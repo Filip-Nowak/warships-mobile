@@ -16,6 +16,7 @@ class ConsoleBoard extends BoardManager{
   }
   @override
   List<Field> getFields() {
+    print("generated fields");
     List<Field> fields = [];
     for (int y = 0; y < 10; y++) {
       for (int x = 0; x < 10; x++) {
@@ -32,23 +33,36 @@ class ConsoleBoard extends BoardManager{
         }
         if(selected.isNotEmpty){
           Border border;
-          if(x==selected[0]&&y==selected[1]){
-            border=Border.all(width: 5,color: Colors.green);
-          }else if(x==selected[0]){
-            border=Border.symmetric(vertical: BorderSide(width: 5,color: Colors.green[900]!), horizontal: BorderSide(width: 5,color: Colors.black));
-          }else if(y==selected[1]){
-            border=Border.symmetric(horizontal: BorderSide(width: 5,color: Colors.green[900]!),vertical: BorderSide(width: 5,color: Colors.black));
+          if(!shooting){
+            if(x==selected[0]&&y==selected[1]){
+              border=Border.all(width: 5,color: Colors.green);
+            }else if(x==selected[0]){
+              border=Border.symmetric(vertical: BorderSide(width: 5,color: Colors.green[900]!), horizontal: BorderSide(width: 5,color: Colors.black));
+            }else if(y==selected[1]){
+              border=Border.symmetric(horizontal: BorderSide(width: 5,color: Colors.green[900]!),vertical: BorderSide(width: 5,color: Colors.black));
+            }else{
+              border=Border.all(width: 5,color: Colors.black);
+            }
+            fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border,));
           }else{
-            border=Border.all(width: 5,color: Colors.black);
+            bool blink=false;
+            if(x==selected[0]&&y==selected[1]){
+              border=Border.all(width: 5,color: Colors.green);
+              blink=true;
+            }else{
+              border=Border.all(width: 5,color: Colors.black);
+            }
+            fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border,blink: blink,));
+
           }
-          fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border,));
           continue;
+
         }
         fields.add(Field(
           backgroundColor: color,
           x: x,
           y: y,
-          disabled: disabled,
+          disabled: false,
           onClick: onClick,
           border: Border.all(width: 5,color: Colors.black),
         ));
@@ -57,12 +71,18 @@ class ConsoleBoard extends BoardManager{
     return fields;
   }
   void onClick(int x,int y){
-    selected.clear();
-    selected.add(x);
-    selected.add(y);
-    changeState((){
-      widget=BoardWidget(size: 400, getFields: getFields);
-    });
+    print(disabled);
+    if(!disabled){
+      selected.clear();
+      selected.add(x);
+      selected.add(y);
+      changeState((){
+        widget=BoardWidget(size: 400, getFields: getFields);
+      });
+    }else{
+      print(disabled);
+    }
+
   }
 
 

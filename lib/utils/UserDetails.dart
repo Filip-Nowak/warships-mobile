@@ -1,5 +1,6 @@
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:warships_mobile/game/Game.dart';
+import 'package:warships_mobile/game/GameFunctions.dart';
 import 'package:warships_mobile/game/OnlineGame.dart';
 import 'package:warships_mobile/newBoards/Board.dart';
 import 'package:warships_mobile/newBoards/CreatorBoard.dart';
@@ -11,7 +12,7 @@ class UserDetails{
   UserDetails._privateConstructor();
   static final UserDetails _instance = UserDetails._privateConstructor();
   static UserDetails get instance => _instance;
-  late Game game=OnlineGame();
+  late Game? game;
   Board board=Board();
   bool online=false;
   void submitShips(Board board, BuildContext context) {
@@ -26,5 +27,10 @@ class UserDetails{
       Navigator.pushNamed(context, "/game");
     }
 
+  }
+  void loadGame(GameFunctions gameFunctions){
+    if(online){
+      game=OnlineGame(gameFunctions);
+    }
   }
 }
