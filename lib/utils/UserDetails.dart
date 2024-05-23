@@ -20,6 +20,7 @@ class UserDetails{
     UserDetails.instance.board=board;
     if(online){
       print("online");
+
       Online.instance.submitShips(board.fields);
     }else{
       print("not online");
@@ -33,4 +34,6 @@ class UserDetails{
       game=OnlineGame(gameFunctions);
     }
   }
+
+  late void Function() back;
 }

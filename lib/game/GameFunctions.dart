@@ -1,7 +1,10 @@
 import '../models/Pos.dart';
 
 class GameFunctions {
-  const GameFunctions({
+  const GameFunctions( {
+    required this.onPlayerLeft,
+    required this.enemyForfeit,
+    required this.playerForfeit,
     required this.startPlayerTurn,
     required this.startEnemyTurn,
     required this.enemyHit,
@@ -28,4 +31,7 @@ class GameFunctions {
   final void Function(int, int) playerAlreadyHit;
   final void Function() playerShooting;
   final void Function() enemyShooting;
+  final void Function(List<List<int>>) playerForfeit;
+  final void Function(List<List<int>>) enemyForfeit;
+  final void Function(List<List<int>>) onPlayerLeft;
 }

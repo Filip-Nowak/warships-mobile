@@ -39,7 +39,7 @@ class BottomPanel extends StatelessWidget {
               board.deployingShip.isNotEmpty?
               Container(
                 width: 400,
-                height: 100,
+                height: 60,
                 child: ElevatedButton(
                     onPressed: cancel,
                     style: ElevatedButton.styleFrom(
@@ -49,7 +49,7 @@ class BottomPanel extends StatelessWidget {
                         )
                     ),
 
-                    child: Label("cancel",fontSize: 70,color: Colors.black,)
+                    child: Label("cancel",fontSize: 40,color: Colors.black,)
                 ),
               ):
           Row(

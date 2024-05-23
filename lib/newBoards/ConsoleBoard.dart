@@ -8,7 +8,9 @@ import 'package:warships_mobile/newBoards/BoardWidget.dart';
 import 'package:warships_mobile/newBoards/Field.dart';
 
 class ConsoleBoard extends BoardManager{
-  ConsoleBoard(super.size);
+  ConsoleBoard(super.size){
+    disabled=true;
+  }
   List<int> selected=[];
   bool shooting=false;
   void setSelected(v){

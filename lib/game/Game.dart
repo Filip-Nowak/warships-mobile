@@ -9,4 +9,7 @@ abstract class Game{
   const Game(this.gameFunctions);
   void shoot(int x, int y);
   final GameFunctions gameFunctions;
+  void returnToRoom(BuildContext context);
+
+  void forfeit();
 }

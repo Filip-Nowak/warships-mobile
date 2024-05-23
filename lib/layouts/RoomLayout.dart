@@ -7,9 +7,11 @@ import 'package:warships_mobile/components/Button.dart';
 import 'package:warships_mobile/components/Label.dart';
 import 'package:warships_mobile/components/PlayerInfo.dart';
 import 'package:warships_mobile/models/Room.dart';
+import 'package:warships_mobile/newBoards/Board.dart';
 import 'package:warships_mobile/utils/ArePlayersReady.dart';
 import 'package:warships_mobile/utils/Handler.dart';
 import 'package:warships_mobile/utils/IsFull.dart';
+import 'package:warships_mobile/utils/UserDetails.dart';
 import 'package:warships_mobile/utils/isOwner.dart';
 
 import '../models/User.dart';
@@ -34,6 +36,14 @@ class _RoomLayoutState extends State<RoomLayout> {
     Online.instance.addRoomMessageHandler("READY", onReady);
     Online.instance.addRoomMessageHandler("NOT_READY", onNotReady);
     Online.instance.addRoomMessageHandler("START", onStartCreator);
+    Online.instance.addRoomMessageHandler("BACK", onBack);
+    Online.instance.addRoomMessageHandler("PLAYER_LEFT", onPlayerLeft);
+    Online.instance.updateRoom=(){
+      setState(() {
+        Online.instance.addRoomMessageHandler("PLAYER_LEFT", onPlayerLeft);
+        users=Online.instance.room.users;
+      });
+    };
   }
 
 
@@ -62,15 +72,51 @@ class _RoomLayoutState extends State<RoomLayout> {
     });
   }
   void onStartCreator(String message){
-    for(User user in Online.instance.room.users){
-      user.ready=false;
-    }
-    Online.instance.creator=true;
+    setState(() {
+      for(User user in Online.instance.room.users){
+        user.ready=false;
+      }
+      Online.instance.creator=true;
+      playerReady=false;
+
+    });
+    UserDetails.instance.back=back;
     Navigator.pushNamed(context, "/creator");
 
   }
+  void back(){
+    Online.instance.back();
+  }
+  void onPlayerLeft(String msg){
+    if(msg==Online.instance.userId){
+      Online.instance.addRoomMessageHandler("JOINED_ROOM", (String str){});
+      Online.instance.addRoomMessageHandler("READY", (String str){});
+      Online.instance.addRoomMessageHandler("NOT_READY", (String str){});
+      Online.instance.addRoomMessageHandler("START", (String str){});
+      Online.instance.addRoomMessageHandler("PLAYER_LEFT", (String str){});
+      Online.instance.deleteRoomData();
+      Online.instance.changeJoinRoom();
+      Navigator.pop(context);
+    }else{
+      setState(() {
+        User? user=Online.instance.room.getUser(msg);
+        if(user!=null){
+          Online.instance.room.users.remove(user);
+          Online.instance.room.ownerId=Online.instance.userId;
+          users=Online.instance.room.users;
+        }
+        if(Online.instance.creator){
+          Navigator.pop(context);
+        }
+      });
+    }
+  }
 
-
+  void onBack(String msg){
+    UserDetails.instance.board=Board();
+    Online.instance.creator=false;
+    Navigator.pop(context);
+  }
 
 
   void handleReadyButton(){
@@ -80,6 +126,13 @@ class _RoomLayoutState extends State<RoomLayout> {
     });
   }
 
+  void handleStartButton(){
+    Online.instance.startCreator();
+  }
+
+  void leaveRoom(){
+    Online.instance.leave();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +140,7 @@ class _RoomLayoutState extends State<RoomLayout> {
     Widget? result = handler.handle();
     result ??= Container(
         width: 400,
-    child: Button(onPressed: () {}, message: "start",fontSize: 50,));
+    child: Button(onPressed: handleStartButton, message: "start",fontSize: 50,));
     return Scaffold(
       body: Container(
         color: Color.fromRGBO(0, 24, 1, 1),
@@ -95,7 +148,12 @@ class _RoomLayoutState extends State<RoomLayout> {
         child: Column(
           children: [
             SizedBox(
-              height: 50,
+              height: 20,
+            ),
+            Row(
+              children: [
+                IconButton(onPressed: leaveRoom, icon: Icon(Icons.arrow_back,size: 50,color: Color.fromRGBO(143, 255, 0,0.5),))
+              ],
             ),
             Label("room code", fontSize: 50),
             SizedBox(
@@ -133,7 +191,7 @@ class _RoomLayoutState extends State<RoomLayout> {
                     : PlayerInfo(nickname: ""),
               ],
             ),
-            SizedBox(height: 150),
+            SizedBox(height: 100),
             Container(
                 width: 400,
                 child: playerReady

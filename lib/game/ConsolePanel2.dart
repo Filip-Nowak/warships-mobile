@@ -13,7 +13,7 @@ class ConsolePanel2 extends StatefulWidget {
   const ConsolePanel2(
       {super.key,
       required this.setMode,
-      required this.handleShoot, required this.mode, required this.board, required this.playerTurn, required this.setPlayerTurn});
+      required this.handleShoot, required this.mode, required this.board, required this.playerTurn, required this.setPlayerTurn, required this.handleForfeit});
 
   final void Function(bool) setMode;
   final Function handleShoot;
@@ -21,6 +21,7 @@ class ConsolePanel2 extends StatefulWidget {
   final ConsoleBoard board;
   final bool playerTurn;
   final Function setPlayerTurn;
+  final void Function() handleForfeit;
   @override
   State<ConsolePanel2> createState() => _ConsolePanel2State();
 }
@@ -95,7 +96,7 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     IconButton(
-                        onPressed: () {},
+                        onPressed: widget.handleForfeit,
                         iconSize: 50,
                         icon: Icon(
                           Icons.cancel,

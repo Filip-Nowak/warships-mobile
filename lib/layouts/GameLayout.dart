@@ -61,6 +61,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:warships_mobile/components/Button.dart';
+import 'package:warships_mobile/components/Modal.dart';
 import 'package:warships_mobile/game/GameFunctions.dart';
 import 'package:warships_mobile/newBoards/BoardWidget.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
@@ -69,6 +71,7 @@ import '../components/GameInfo.dart';
 import '../components/Label.dart';
 import '../game/ConsolePanel.dart';
 import '../game/ConsolePanel2.dart';
+import '../game/EndingScreen.dart';
 import '../game/StartingScreen.dart';
 import '../models/Pos.dart';
 import '../newBoards/Board.dart';
@@ -87,9 +90,9 @@ class _GameLayoutState extends State<GameLayout> {
   SeaBoard seaBoard = SeaBoard(400, UserDetails.instance.board);
   List<int> selected = [];
   ConsoleBoard consoleBoard = ConsoleBoard(400);
-  String message="";
-  bool startingScreen=true;
-  bool playerTurn=false;
+  String message = "";
+  bool startingScreen = true;
+  bool playerTurn = false;
 
   void changeState(Function callback) {
     setState(() {
@@ -99,13 +102,14 @@ class _GameLayoutState extends State<GameLayout> {
 
   void shoot(int x, int y) {
     setState(() {
-      consoleBoard.shooting=true;
-      consoleBoard.disabled=true;
+      consoleBoard.shooting = true;
+      consoleBoard.disabled = true;
       consoleBoard.update();
     });
 
     UserDetails.instance.game!.shoot(x, y);
   }
+
   void showStartingScreen() {
     showDialog(
         barrierDismissible: false,
@@ -122,12 +126,24 @@ class _GameLayoutState extends State<GameLayout> {
     }
   }
 
+  void showEndingScreen(String title, String message,SeaBoard enemyBoard) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return EndingScreen(
+            title: title,
+            message: message,
+            returnToRoom: returnToLobby, enemyBoard: enemyBoard,
+          );
+        });
+  }
 
-    void startPlayerTurn() {
+  void startPlayerTurn() {
     setState(() {
-      consoleBoard.disabled=false;
-      playerTurn=true;
-      consoleMode=true;
+      consoleBoard.disabled = false;
+      playerTurn = true;
+      consoleMode = true;
       message = "pick field";
       seaBoard.update();
     });
@@ -144,13 +160,14 @@ class _GameLayoutState extends State<GameLayout> {
   void playerHit(int x, int y) {
     setState(() {
       message = "enemy ship got hit";
-      consoleBoard.shooting=false;
+      consoleBoard.shooting = false;
       consoleBoard.selected.clear();
 
       consoleBoard.board.setField(x, y, 1);
-      consoleBoard.widget=BoardWidget(size: 400, getFields: consoleBoard.getFields);
+      consoleBoard.widget =
+          BoardWidget(size: 400, getFields: consoleBoard.getFields);
     });
-    }
+  }
 
   void enemyHit(int x, int y) {
     setState(() {
@@ -163,7 +180,7 @@ class _GameLayoutState extends State<GameLayout> {
   void playerMiss(Pos? pos) {
     setState(() {
       consoleBoard.selected.clear();
-      consoleBoard.shooting=false;
+      consoleBoard.shooting = false;
     });
     if (pos == null) {
       setState(() {
@@ -195,7 +212,7 @@ class _GameLayoutState extends State<GameLayout> {
   void playerSunken(int x, int y) {
     setState(() {
       consoleBoard.selected.clear();
-      consoleBoard.shooting=false;
+      consoleBoard.shooting = false;
       message = "enemy ship got sunken";
     });
     consoleBoard.board.setField(x, y, 2);
@@ -221,7 +238,7 @@ class _GameLayoutState extends State<GameLayout> {
   void playerAlreadyHit(int x, int y) {
     setState(() {
       consoleBoard.selected.clear();
-      consoleBoard.shooting=false;
+      consoleBoard.shooting = false;
       consoleBoard.update();
       message = "already hit";
     });
@@ -229,7 +246,7 @@ class _GameLayoutState extends State<GameLayout> {
 
   void playerShooting() {
     setState(() {
-      consoleBoard.shooting=true;
+      consoleBoard.shooting = true;
       message = "shooting";
     });
     print("player shooting");
@@ -242,6 +259,78 @@ class _GameLayoutState extends State<GameLayout> {
     print("enemt shooting");
   }
 
+  void enemyForfeit(List<List<int>>fields) {
+    Board board=Board();
+    board.fields=fields;
+    showEndingScreen("you won", "enemy forfeited",SeaBoard(350, board));
+  }
+
+  void playerForfeit(List<List<int>>fields) {
+    Board board=Board();
+    board.fields=fields;
+    showEndingScreen("you lost", "you forfeited",SeaBoard(350, board));
+  }
+
+  void onReturnToLobby() {
+    Navigator.pop(context);
+  }
+
+  void onPlayerLeft(List<List<int>>fields) {
+    hideStartingScreen();
+    Board board=Board();
+    board.fields=fields;
+    showEndingScreen("you won", "enemy left",SeaBoard(350, board));
+  }
+
+  void returnToLobby() {
+    UserDetails.instance.game!.returnToRoom(context);
+  }
+
+  void handleForfeitClick() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Modal(
+              child: Container(
+            child: Column(
+              children: [
+                Label("are you sure?", fontSize: 40),
+                SizedBox(
+                  height: 70,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Button(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      message: "no",
+                      fontSize: 30,
+                      backGroundColor: Color.fromRGBO(0, 0, 0, 0),
+                      border: BorderSide(),
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          UserDetails.instance.game!.forfeit();
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15))),
+                        child: Label(
+                          "yes",
+                          fontSize: 30,
+                          color: Colors.black,
+                        )),
+                  ],
+                )
+              ],
+            ),
+          ));
+        });
+  }
 
   @override
   void initState() {
@@ -249,18 +338,22 @@ class _GameLayoutState extends State<GameLayout> {
     consoleBoard.setChangeState(changeState);
     consoleBoard.setSelected(selected);
     UserDetails.instance.loadGame(GameFunctions(
-        startPlayerTurn: startPlayerTurn,
-        startEnemyTurn: startEnemyTurn,
-        enemyHit: enemyHit,
-        playerHit: playerHit,
-        playerMiss: playerMiss,
-        enemyMiss: enemyMiss,
-        playerSunken: playerSunken,
-        enemySunken: enemySunken,
-        enemyAlreadyHit: enemyAlreadyHit,
-        playerAlreadyHit: playerAlreadyHit,
-        playerShooting: playerShooting,
-        enemyShooting: enemyShooting));
+      startPlayerTurn: startPlayerTurn,
+      startEnemyTurn: startEnemyTurn,
+      enemyHit: enemyHit,
+      playerHit: playerHit,
+      playerMiss: playerMiss,
+      enemyMiss: enemyMiss,
+      playerSunken: playerSunken,
+      enemySunken: enemySunken,
+      enemyAlreadyHit: enemyAlreadyHit,
+      playerAlreadyHit: playerAlreadyHit,
+      playerShooting: playerShooting,
+      enemyShooting: enemyShooting,
+      enemyForfeit: enemyForfeit,
+      playerForfeit: playerForfeit,
+      onPlayerLeft: onPlayerLeft,
+    ));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showStartingScreen();
     });
@@ -302,7 +395,11 @@ class _GameLayoutState extends State<GameLayout> {
             board: consoleBoard,
             mode: false,
             handleShoot: shoot,
-            playerTurn:playerTurn, setPlayerTurn: (turn){playerTurn=turn;},
+            playerTurn: playerTurn,
+            setPlayerTurn: (turn) {
+              playerTurn = turn;
+            },
+            handleForfeit: handleForfeitClick,
           ),
         )
       ]),

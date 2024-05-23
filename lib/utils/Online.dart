@@ -8,6 +8,8 @@ import 'package:warships_mobile/models/RoomMessage.dart';
 import 'package:warships_mobile/models/RoomResponse.dart';
 
 class Online {
+  late void Function() updateRoom;
+
   Online._privateConstructor();
 
   static final Online _instance = Online._privateConstructor();
@@ -31,7 +33,7 @@ class Online {
     _userId = value;
   }
 
-  final String _url = "http://:8080";
+  final String _url = "http://192.168.1.208:8080";
   StompClient? stompClient;
   Room _room = Room("x", [], "x");
 
@@ -50,9 +52,8 @@ class Online {
 
   Future<bool> createUser(String username) async {
     final Map<String, dynamic> body = {"nickname": username};
-
+    print("creating user");
     try {
-      print("dziala");
       final response = await http.post(
         Uri.parse("$_url/createUser"),
         body: json.encode(body),
@@ -60,7 +61,6 @@ class Online {
           'Content-Type': 'application/json',
         },
       );
-      print("dziala");
       if (response.statusCode == 200) {
         _username = username;
         userId = jsonDecode(response.body)["message"];
@@ -175,5 +175,52 @@ class Online {
         message: noShips ? "" : jsonEncode(fields));
     print("sending");
     stompClient!.send(destination: "/app/submitShips", body: json.encode(msg));
+  }
+
+  void forfeit() {
+    stompClient!.send(
+        destination: "/app/forfeit",
+        body: json.encode(
+            RoomMessage(senderId: userId, roomId: room.id, message: "").toJson()));
+  }
+
+  void startCreator() {
+    stompClient!.send(
+        destination: "/app/start",
+        body: json.encode(
+            RoomMessage(senderId: userId, roomId: room.id, message: "").toJson()));
+  }
+
+  void leave() {
+    stompClient!.send(
+        destination: "/app/leaveRoom",
+        body: json.encode(
+            RoomMessage(senderId: userId, roomId: room.id, message: "").toJson()));
+  }
+
+  void deleteRoomData() {
+    room=Room("x", [], "x");
+
+  }
+  late void Function(String) _joinRoom;
+  void setJoinRoom(void Function(String code) joinRoom) {
+    _joinRoom=joinRoom;
+  }
+  void changeJoinRoom(){
+    addRoomMessageHandler("JOINED_ROOM", _joinRoom);
+  }
+  void deleteSession(){
+    stompClient!.deactivate();
+    stompClient=null;
+    userId="";
+    _username="";
+
+  }
+
+  void back() {
+    stompClient!.send(
+        destination: "/app/back",
+        body: json.encode(
+            RoomMessage(senderId: userId, roomId: room.id, message: "").toJson()));
   }
 }

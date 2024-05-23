@@ -1,9 +1,19 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
 import 'package:warships_mobile/game/Game.dart';
 import 'package:warships_mobile/game/GameView.dart';
 import 'package:warships_mobile/game/GameViewController.dart';
 import 'package:warships_mobile/models/GameLog.dart';
 import 'package:warships_mobile/models/Pos.dart';
+import 'package:warships_mobile/models/RoomMessage.dart';
+import 'package:warships_mobile/models/User.dart';
+import 'package:warships_mobile/newBoards/Board.dart';
 import 'package:warships_mobile/utils/Online.dart';
+import 'package:warships_mobile/utils/UserDetails.dart';
+
+import '../models/EndGameUser.dart';
+import '../models/Room.dart';
 
 class OnlineGame extends Game{
   // late GameView _view;
@@ -22,8 +32,9 @@ class OnlineGame extends Game{
     Online.instance.addGameLogHandler("ALREADY_HIT", onAlreadyHit);
     Online.instance.addGameLogHandler("SHOOTING", onShooting);
     Online.instance.addGameLogHandler("WIN", onWin);
-    Online.instance.addGameLogHandler("PLAYER_LEFT", onPlayerLeft);
-    Online.instance.addGameLogHandler("FORFEIT", onForfeit);
+    Online.instance.addRoomMessageHandler("PLAYER_LEFT", onPlayerLeft);
+    Online.instance.addRoomMessageHandler("FORFEIT", onForfeit);
+
   }
 
   void onStartedTurn(GameLog log){
@@ -70,19 +81,80 @@ class OnlineGame extends Game{
     }
   }
   void onWin(GameLog log){
+    Online.instance.addGameLogHandler("STARTED_TURN", (GameLog log){});
+    Online.instance.addGameLogHandler("HIT", (GameLog log){});
+    Online.instance.addGameLogHandler("MISS", (GameLog log){});
+    Online.instance.addGameLogHandler("SUNKEN", (GameLog log){});
+    Online.instance.addGameLogHandler("ALREADY_HIT", (GameLog log){});
+    Online.instance.addGameLogHandler("SHOOTING", (GameLog log){});
+    Online.instance.addGameLogHandler("WIN", (GameLog log){});
+  }
+  void onPlayerLeft(String message){
+    Online.instance.addGameLogHandler("STARTED_TURN", (GameLog log){});
+    Online.instance.addGameLogHandler("HIT", (GameLog log){});
+    Online.instance.addGameLogHandler("MISS", (GameLog log){});
+    Online.instance.addGameLogHandler("SUNKEN", (GameLog log){});
+    Online.instance.addGameLogHandler("ALREADY_HIT", (GameLog log){});
+    Online.instance.addGameLogHandler("SHOOTING", (GameLog log){});
+    Online.instance.addGameLogHandler("WIN", (GameLog log){});
+    if(json.decode(message) is int){
+      Room room=Online.instance.room;
+      for(int i=0;i<room.users.length;i++){
+        if(room.users[i].id==json.decode(message).toString()){
+          room.users.removeAt(i);
+          room.ownerId=Online.instance.userId;
+        }
+      }
+      Online.instance.updateRoom();
+    }else{
+      EndGameUser user = EndGameUser.fromJson(jsonDecode(message));
+      Room room=Online.instance.room;
+      for(int i=0;i<room.users.length;i++){
+        if(room.users[i].id==user.id){
+          room.users.removeAt(i);
+          room.ownerId=Online.instance.userId;
+        }
+      }
+      Online.instance.updateRoom();
+      gameFunctions.onPlayerLeft(user.fields);
+    }
 
   }
-  void onPlayerLeft(GameLog log){
-
+  void onForfeit(String msg){
+    Online.instance.addGameLogHandler("STARTED_TURN", (GameLog log){});
+    Online.instance.addGameLogHandler("HIT", (GameLog log){});
+    Online.instance.addGameLogHandler("MISS", (GameLog log){});
+    Online.instance.addGameLogHandler("SUNKEN", (GameLog log){});
+    Online.instance.addGameLogHandler("ALREADY_HIT", (GameLog log){});
+    Online.instance.addGameLogHandler("SHOOTING", (GameLog log){});
+    Online.instance.addGameLogHandler("WIN", (GameLog log){});
+    EndGameUser user = EndGameUser.fromJson(jsonDecode(msg));
+    if(user.id==Online.instance.userId){
+      gameFunctions.playerForfeit(user.fields);
+    }else{
+      gameFunctions.enemyForfeit(user.fields);
+    }
   }
-  void onForfeit(GameLog log){
 
-  }
 
   @override
   void shoot(int x, int y) {
     print("shooting in online game");
     Online.instance.shoot(Pos(x: x, y: y));
+  }
+
+  @override
+  void returnToRoom(BuildContext context) {
+    Online.instance.creator=false;
+    UserDetails.instance.game=null;
+    UserDetails.instance.board=Board();
+    Navigator.pop(context);
+    Navigator.pop(context);
+  }
+
+  @override
+  void forfeit() {
+    Online.instance.forfeit();
   }
 
 

@@ -13,7 +13,6 @@ import '../components/Label.dart';
 import '../newBoards/CreatorBoard.dart';
 import '../utils/StopWatch.dart';
 
-
 class CreatorLayout extends StatefulWidget {
   const CreatorLayout({super.key});
 
@@ -22,99 +21,182 @@ class CreatorLayout extends StatefulWidget {
 }
 
 class _CreatorLayoutState extends State<CreatorLayout> {
-  int selectedShip=0;
-  List<int> shipsLeft=[1,2,3,4];
-  CreatorBoard board=CreatorBoard(400);
+  int selectedShip = 0;
+  List<int> shipsLeft = [1, 2, 3, 4];
+  CreatorBoard board = CreatorBoard(400);
   late StopWatch stopwatch;
-  void addShip(){
+
+  void addShip() {
     setState(() {
       board.setSelectedShip(0);
-      shipsLeft[4-selectedShip]--;
-      selectedShip=0;
+      shipsLeft[4 - selectedShip]--;
+      selectedShip = 0;
     });
   }
-  void changeShip(int newShip){
+
+  void changeShip(int newShip) {
     setState(() {
       board.setSelectedShip(newShip);
-      selectedShip=newShip;
-      board.widget=BoardWidget(size: 400, getFields: board.getFields);
+      selectedShip = newShip;
+      board.widget = BoardWidget(size: 400, getFields: board.getFields);
     });
   }
-  void changeState(Function callback){
+
+  void changeState(Function callback) {
     setState(() {
       callback();
     });
   }
-  void changeMode(bool mode){
+
+  void changeMode(bool mode) {
     setState(() {
-      board.removeMode=mode;
-      board.widget=BoardWidget(size: board.widget.size, getFields: board.getFields);
+      board.removeMode = mode;
+      board.widget =
+          BoardWidget(size: board.widget.size, getFields: board.getFields);
     });
   }
-  void start(){
-    board.board.transformToSea();
-    UserDetails.instance.submitShips(board.board,context);
 
+  void start() {
+    board.board.transformToSea();
+    if (UserDetails.instance.online) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+    UserDetails.instance.submitShips(board.board, context);
   }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    stopwatch.timer.cancel();
+  }
+
   @override
   void initState() {
     super.initState();
     board.setChangeState(changeState);
     board.setAddShip(addShip);
     board.setRemoveShip(removeShip);
-    Online.instance.creator=true;
-    if(Online.instance.creator){
-      stopwatch=StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
-      stopwatch.start(60);
+    if (UserDetails.instance.online) {
+      Online.instance.creator = true;
+      if (Online.instance.creator) {
+        stopwatch = StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
+        stopwatch.start(60);
+      }
+      Online.instance.addRoomMessageHandler("LAUNCH", (message) {
+        setState(() {
+          _isLoading = false;
+        });
+        stopwatch.timer.cancel();
+        Navigator.pop(context);
+        Navigator.pushNamed(context, "/game");
+      });
     }
-    Online.instance.addRoomMessageHandler("LAUNCH", (message) {
-      stopwatch.timer.cancel();
-      Navigator.pop(context);
-      Navigator.pushNamed(context, "/game");
-    });
   }
-  void removeShip(int size){
+
+  void removeShip(int size) {
     setState(() {
-      shipsLeft[4-size]++;
+      shipsLeft[4 - size]++;
     });
   }
-  void cancel(){
+
+  void cancel() {
     setState(() {
       board.cancel();
-      board.widget=BoardWidget(size: 400, getFields: board.getFields);
+      board.widget = BoardWidget(size: 400, getFields: board.getFields);
     });
   }
-  int time=0;
-  void onTimeChange(int time){
+
+  bool _isLoading = false;
+  int time = 0;
+
+  void onTimeChange(int time) {
     setState(() {
-      this.time=time;
+      this.time = time;
     });
   }
-  void onTimeEnd(){
-    print("end");
+
+  void onTimeEnd() {
+    start();
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: board.removeMode?Color.fromRGBO(30, 0, 0, 1):Color.fromRGBO(0, 24, 1, 1),
-        body: Container(
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(
-                height: 30,
+    return
+      Scaffold(
+          backgroundColor: board.removeMode
+              ? Color.fromRGBO(30, 0, 0, 1)
+              : Color.fromRGBO(0, 24, 1, 1),
+          body: Stack(
+            children: [Container(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                          onPressed: UserDetails.instance.back,
+                          icon: Icon(
+                            Icons.arrow_back,
+                            size: 50,
+                            color: Color.fromRGBO(143, 255, 0, 1.0),
+                          ))
+                    ],
+                  ),
+                  const Label("deploy ships", fontSize: 50),
+                  TimerWidget(size: 40, time: time),
+                  board.widget,
+                  SizedBox(
+                    height: 30,
+                  ),
+                  BottomPanel(
+                    changeMode: changeMode,
+                    board: board,
+                    selectedShip: selectedShip,
+                    changeShip: changeShip,
+                    start: start,
+                    shipsLeft: shipsLeft,
+                    removeMode: board.removeMode,
+                    cancel: cancel,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
               ),
-              const Label("deploy ships", fontSize: 50),
-              TimerWidget(size: 40,time:time),
-              board.widget,
-              SizedBox(height: 30,),
-              BottomPanel(changeMode: changeMode, board: board,selectedShip:selectedShip,changeShip:changeShip, start: start, shipsLeft: shipsLeft,removeMode: board.removeMode, cancel: cancel,),
-              SizedBox(height: 20,),
+            ),
+              if (_isLoading)
+                AbsorbPointer(
+                  child: Stack(
+                    children: [
+                      ModalBarrier(
+                          dismissible: false, color: Colors.black.withOpacity(0.8)),
+                      Center(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
 
-            ],
-          ),
-        ));
+                          Label(
+                            "waiting for enemy",
+                            fontSize: 50,
+                          ),
+                          CircularProgressIndicator(
+                            color: Color.fromRGBO(143, 255, 0, 1.0),
+                          )
+                        ]),
+                      ),
+                    ],
+                  ),
+                ),
+          ]));
 
+    ;
   }
 }
