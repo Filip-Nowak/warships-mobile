@@ -11,7 +11,7 @@ class IsFull extends Handler{
     if(Online.instance.room.users.length==2){
       return handleNext();
     }
-    return Label("waiting for players", fontSize: 40);
+    return Label("waiting for players", fontSize: 30);
   }
 
 }

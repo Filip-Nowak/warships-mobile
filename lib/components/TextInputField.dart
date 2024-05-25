@@ -2,15 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class TextInput extends StatefulWidget {
-  const TextInput({super.key, required this.onClick, required this.fontSize});
+class TextInputField extends StatefulWidget {
+  const TextInputField({super.key, required this.onClick, required this.fontSize});
   final Function onClick;
   final int fontSize;
   @override
-  State<TextInput> createState() => _TextInputState();
+  State<TextInputField> createState() => _TextInputFieldState();
 }
 
-class _TextInputState extends State<TextInput> {
+class _TextInputFieldState extends State<TextInputField> {
     String content="";
 
   @override
@@ -23,7 +23,7 @@ class _TextInputState extends State<TextInput> {
           Container(
             decoration: BoxDecoration(
                 border: Border.all(width: 5, color: Colors.black)),
-            width: 240,
+            width: 235,
             child: TextField(
               style: TextStyle(
                 fontSize: widget.fontSize.toDouble(),

@@ -37,7 +37,7 @@ class _ShipSelectorState extends State<ShipSelector> {
           )
         : Container(
             width: 400,
-            height: 200,
+            height: 170,
             child: Column(
               children: [
                 Container(
@@ -78,7 +78,7 @@ class _ShipSelectorState extends State<ShipSelector> {
                 Container(
                   decoration: BoxDecoration(
                       border: Border.all(width: 2, color: Colors.green)),
-                  height: 120,
+                  height: 110,
                   width: double.infinity,
                   child: widget.selectedShip == 0
                       ? Container(

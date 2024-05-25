@@ -14,7 +14,8 @@ class EndingScreen extends StatelessWidget {
   final SeaBoard enemyBoard;
   void showEnemyShips(BuildContext context){
     showDialog(context: context, builder: (BuildContext context){
-      return Modal(child: Column(
+      return Modal(
+        child: Column(
         children: [
           SizedBox(height: 30,),
           Label("enemy ships", fontSize: 40),
@@ -31,15 +32,23 @@ class EndingScreen extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return  Modal(child: Column(
-      children: [
-        Label(title, fontSize: 40),
-        Label(message,fontSize: 30,),
-        SizedBox(height: 50,),
-        Button(onPressed: (){showEnemyShips(context);}, message: "showEnemyShip",fontSize: 35,),
-        SizedBox(height: 20,),
-        Button(onPressed: returnToRoom, message: "return to lobby",fontSize: 33,)
-      ],
-    ), height: 300,);
+    return  PopScope(
+      canPop: false,
+      onPopInvoked: (xd){
+        if(xd){
+          return;
+        }
+      },
+      child: Modal(child: Column(
+        children: [
+          Label(title, fontSize: 40),
+          Label(message,fontSize: 30,),
+          SizedBox(height: 50,),
+          Button(onPressed: (){showEnemyShips(context);}, message: "showEnemyShip",fontSize: 25,),
+          SizedBox(height: 5,),
+          Button(onPressed: returnToRoom, message: "return to lobby",fontSize: 25,)
+        ],
+      ), height: 280,),
+    );
   }
 }

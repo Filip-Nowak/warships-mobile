@@ -40,6 +40,7 @@ class _RoomLayoutState extends State<RoomLayout> {
     Online.instance.addRoomMessageHandler("PLAYER_LEFT", onPlayerLeft);
     Online.instance.updateRoom=(){
       setState(() {
+        print("update");
         Online.instance.addRoomMessageHandler("PLAYER_LEFT", onPlayerLeft);
         users=Online.instance.room.users;
       });
@@ -88,6 +89,7 @@ class _RoomLayoutState extends State<RoomLayout> {
     Online.instance.back();
   }
   void onPlayerLeft(String msg){
+    print("left from room");
     if(msg==Online.instance.userId){
       Online.instance.addRoomMessageHandler("JOINED_ROOM", (String str){});
       Online.instance.addRoomMessageHandler("READY", (String str){});
@@ -141,76 +143,85 @@ class _RoomLayoutState extends State<RoomLayout> {
     result ??= Container(
         width: 400,
     child: Button(onPressed: handleStartButton, message: "start",fontSize: 50,));
-    return Scaffold(
-      body: Container(
-        color: Color.fromRGBO(0, 24, 1, 1),
-        width: double.infinity,
-        child: Column(
-          children: [
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                IconButton(onPressed: leaveRoom, icon: Icon(Icons.arrow_back,size: 50,color: Color.fromRGBO(143, 255, 0,0.5),))
-              ],
-            ),
-            Label("room code", fontSize: 50),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              color: Colors.black,
-              width: 300,
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              // child: Label(Online.instance.getRoom()!.id,fontSize: 80,),
-              child: Label(
-                Online.instance.room.id,
-                fontSize: 80,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (xd){
+        if(xd){
+          return;
+        }
+        leaveRoom();
+      },
+      child: Scaffold(
+        body: Container(
+          color: Color.fromRGBO(0, 24, 1, 1),
+          width: double.infinity,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 20,
               ),
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            Label("players", fontSize: 50),
-            SizedBox(
-              height: 30,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                PlayerInfo(
-                  nickname: users[0].nickname,
-                  ready: users[0].ready,
+              Row(
+                children: [
+                  IconButton(onPressed: leaveRoom, icon: Icon(Icons.arrow_back,size: 50,color: Color.fromRGBO(143, 255, 0,0.5),))
+                ],
+              ),
+              Label("room code", fontSize: 50),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                color: Colors.black,
+                width: 300,
+                padding: EdgeInsets.symmetric(horizontal: 40),
+                // child: Label(Online.instance.getRoom()!.id,fontSize: 80,),
+                child: Label(
+                  Online.instance.room.id,
+                  fontSize: 80,
                 ),
-                users.length == 2
-                    ? PlayerInfo(
-                        nickname: users[1].nickname,
-                        ready: users[1].ready,
-                      )
-                    : PlayerInfo(nickname: ""),
-              ],
-            ),
-            SizedBox(height: 100),
-            Container(
-                width: 400,
-                child: playerReady
-                    ? Button(
-                        onPressed: handleReadyButton,
-                        message: "ready",
-                        fontSize: 50,
-                        backGroundColor: Color.fromRGBO(0, 0, 0, 0),
-                        border: BorderSide(
-                            color: Color.fromRGBO(143, 255, 0, 1), width: 5),
-                      )
-                    : Button(
-                        onPressed: handleReadyButton,
-                        message: "ready",
-                        fontSize: 50,
-                      )),
-            SizedBox(height: 20,),
-            result
-          ],
+              ),
+              SizedBox(
+                height:30,
+              ),
+              Label("players", fontSize: 50),
+              SizedBox(
+                height: 30,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  PlayerInfo(
+                    nickname: users[0].nickname,
+                    ready: users[0].ready,
+                  ),
+                  users.length == 2
+                      ? PlayerInfo(
+                          nickname: users[1].nickname,
+                          ready: users[1].ready,
+                        )
+                      : PlayerInfo(nickname: ""),
+                ],
+              ),
+              SizedBox(height: 100),
+              Container(
+                  width: 400,
+                  child: playerReady
+                      ? Button(
+                          onPressed: handleReadyButton,
+                          message: "ready",
+                          fontSize: 50,
+                          backGroundColor: Color.fromRGBO(0, 0, 0, 0),
+                          border: BorderSide(
+                              color: Color.fromRGBO(143, 255, 0, 1), width: 5),
+                        )
+                      : Button(
+                          onPressed: handleReadyButton,
+                          message: "ready",
+                          fontSize: 50,
+                        )),
+              SizedBox(height: 20,),
+              result
+            ],
+          ),
         ),
       ),
     );

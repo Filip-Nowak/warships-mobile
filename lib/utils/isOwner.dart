@@ -15,7 +15,7 @@ class IsOwner extends Handler{
     }
     return Label(
       "room owner can start",
-      fontSize: 40,
+      fontSize: 30,
     );
   }
 

@@ -7,7 +7,7 @@ import '../models/Pos.dart';
 abstract class Game{
   // late GameView view;
   const Game(this.gameFunctions);
-  void shoot(int x, int y);
+  void shoot(Pos? pos);
   final GameFunctions gameFunctions;
   void returnToRoom(BuildContext context);
 

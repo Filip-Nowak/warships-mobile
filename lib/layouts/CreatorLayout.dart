@@ -24,7 +24,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   int selectedShip = 0;
   List<int> shipsLeft = [1, 2, 3, 4];
   CreatorBoard board = CreatorBoard(400);
-  late StopWatch stopwatch;
+  late StopWatch stopwatch=StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
 
   void addShip() {
     setState(() {
@@ -70,7 +70,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    stopwatch.timer.cancel();
+    stopwatch.stop();
   }
 
   @override
@@ -79,17 +79,18 @@ class _CreatorLayoutState extends State<CreatorLayout> {
     board.setChangeState(changeState);
     board.setAddShip(addShip);
     board.setRemoveShip(removeShip);
+    print(UserDetails.instance.online);
     if (UserDetails.instance.online) {
+      print('xd');
       Online.instance.creator = true;
       if (Online.instance.creator) {
-        stopwatch = StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
         stopwatch.start(60);
       }
       Online.instance.addRoomMessageHandler("LAUNCH", (message) {
         setState(() {
           _isLoading = false;
         });
-        stopwatch.timer.cancel();
+        stopwatch.stop();
         Navigator.pop(context);
         Navigator.pushNamed(context, "/game");
       });
@@ -125,77 +126,81 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   @override
   Widget build(BuildContext context) {
     return
-      Scaffold(
-          backgroundColor: board.removeMode
-              ? Color.fromRGBO(30, 0, 0, 1)
-              : Color.fromRGBO(0, 24, 1, 1),
-          body: Stack(
-            children: [Container(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: UserDetails.instance.back,
-                          icon: Icon(
-                            Icons.arrow_back,
-                            size: 50,
-                            color: Color.fromRGBO(143, 255, 0, 1.0),
-                          ))
-                    ],
-                  ),
-                  const Label("deploy ships", fontSize: 50),
-                  TimerWidget(size: 40, time: time),
-                  board.widget,
-                  SizedBox(
-                    height: 30,
-                  ),
-                  BottomPanel(
-                    changeMode: changeMode,
-                    board: board,
-                    selectedShip: selectedShip,
-                    changeShip: changeShip,
-                    start: start,
-                    shipsLeft: shipsLeft,
-                    removeMode: board.removeMode,
-                    cancel: cancel,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
-            ),
-              if (_isLoading)
-                AbsorbPointer(
-                  child: Stack(
-                    children: [
-                      ModalBarrier(
-                          dismissible: false, color: Colors.black.withOpacity(0.8)),
-                      Center(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+      PopScope(
+        canPop: false,
+        onPopInvoked: (xd){
+          if(xd){
+            return;
+          }
+          UserDetails.instance.back();
+        },
+        child: Scaffold(
+            backgroundColor: board.removeMode
+                ? Color.fromRGBO(30, 0, 0, 1)
+                : Color.fromRGBO(0, 24, 1, 1),
+            body: Stack(
+              children: [Container(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: UserDetails.instance.back,
+                            icon: Icon(
+                              Icons.arrow_back,
+                              size: 50,
+                              color: Color.fromRGBO(143, 255, 0, 1.0),
+                            ))
+                      ],
+                    ),
+                    const Label("deploy ships", fontSize: 40),
+                    TimerWidget(size: 30, time: time),
+                    board.widget,
+                    BottomPanel(
+                      changeMode: changeMode,
+                      board: board,
+                      selectedShip: selectedShip,
+                      changeShip: changeShip,
+                      start: start,
+                      shipsLeft: shipsLeft,
+                      removeMode: board.removeMode,
+                      cancel: cancel,
+                    ),
 
-                          Label(
-                            "waiting for enemy",
-                            fontSize: 50,
-                          ),
-                          CircularProgressIndicator(
-                            color: Color.fromRGBO(143, 255, 0, 1.0),
-                          )
-                        ]),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-          ]));
+              ),
+                if (_isLoading)
+                  AbsorbPointer(
+                    child: Stack(
+                      children: [
+                        ModalBarrier(
+                            dismissible: false, color: Colors.black.withOpacity(0.8)),
+                        Center(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+
+                            Label(
+                              "waiting for enemy",
+                              fontSize: 50,
+                            ),
+                            CircularProgressIndicator(
+                              color: Color.fromRGBO(143, 255, 0, 1.0),
+                            )
+                          ]),
+                        ),
+                      ],
+                    ),
+                  ),
+            ])),
+      );
 
     ;
   }

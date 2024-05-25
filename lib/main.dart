@@ -8,6 +8,7 @@ import 'layouts/CreatorLayout.dart';
 import 'layouts/HomeLayout.dart';
 
 void main() {
+  print("start");
   runApp(MaterialApp(
     initialRoute: "/home",
     routes: {

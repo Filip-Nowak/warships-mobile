@@ -12,7 +12,7 @@ class PlayerInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
+      width: 190,
       child: Column(
         children: [
           Container(
@@ -21,7 +21,7 @@ class PlayerInfo extends StatelessWidget {
                   child: Label(nickname.isNotEmpty ? nickname : "waiting",
                       fontSize: nickname.length < 5
                           ? 40
-                          : (200 / nickname.length.floor()).toInt(),
+                          : (190 / nickname.length.floor()).toInt(),
                   color: Color.fromRGBO(143, 255, 0, nickname.isEmpty?0.5:1),))),
           ready==null?const SizedBox():Label("ready", fontSize: 25, color: Color.fromRGBO(143, 255, 0, ready!?1:0.5))
         ],

@@ -79,7 +79,7 @@ class ConsoleBoard extends BoardManager{
       selected.add(x);
       selected.add(y);
       changeState((){
-        widget=BoardWidget(size: 400, getFields: getFields);
+        widget=BoardWidget(size: 350, getFields: getFields);
       });
     }else{
       print(disabled);

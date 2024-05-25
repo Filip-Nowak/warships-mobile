@@ -1,18 +1,24 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:stomp_dart_client/stomp_dart_client.dart';
+import 'package:warships_mobile/components/Button.dart';
+import 'package:warships_mobile/components/Label.dart';
+import 'package:warships_mobile/components/Modal.dart';
 import 'package:warships_mobile/models/GameLog.dart';
 import 'package:warships_mobile/models/Pos.dart';
 import 'package:warships_mobile/models/Room.dart';
 import 'package:warships_mobile/models/RoomMessage.dart';
 import 'package:warships_mobile/models/RoomResponse.dart';
+import 'package:warships_mobile/utils/UserDetails.dart';
 
 class Online {
   late void Function() updateRoom;
 
   Online._privateConstructor();
 
-  static final Online _instance = Online._privateConstructor();
+  static Online _instance = Online._privateConstructor();
 
   static Online get instance => _instance;
   String _username = "";
@@ -33,7 +39,7 @@ class Online {
     _userId = value;
   }
 
-  final String _url = "http://192.168.1.208:8080";
+  final String _url = "http://192.168.1.74:8080";
   StompClient? stompClient;
   Room _room = Room("x", [], "x");
 
@@ -49,8 +55,7 @@ class Online {
         body: json.encode(
             RoomMessage(senderId: userId, roomId: code, message: "").toJson()));
   }
-
-  Future<bool> createUser(String username) async {
+  Future<bool> createUser(String username,BuildContext context) async {
     final Map<String, dynamic> body = {"nickname": username};
     print("creating user");
     try {
@@ -69,15 +74,15 @@ class Online {
       }
     } catch (e) {
       print(e);
+      onError(context);
     }
 
     print("error");
     return false;
   }
-
   Future<bool> connect(
       {required void Function() onConnect,
-      required void Function(dynamic) onError}) async {
+      required BuildContext context}) async {
     final socketUrl = '$_url/ws?userId=$userId';
     if (stompClient == null) {
       stompClient = StompClient(
@@ -90,11 +95,33 @@ class Online {
               destination: "/user/$userId/game", callback: handleGameLog);
           onConnect();
         },
-        onWebSocketError: onError,
+        onWebSocketError: (e){
+          onError(context);
+        },
+            onStompError: (e){
+          onError(context);
+            },
+
       ));
       stompClient!.activate();
     }
     return false;
+  }
+  void onError(BuildContext context){
+    print("onError");
+    showDialog(context: context, builder: (context){
+      return Modal(
+          child:
+      Container(
+        child: Column(
+          children: [
+            Label("server error occured", fontSize: 30),
+            SizedBox(height: 30,),
+            Button(onPressed: (){Navigator.popUntil(context, (route){Online.reset();return route.isFirst;});}, message: "return to home")
+          ],
+        ),
+      ));
+    },barrierDismissible: false);
   }
 
   void handleRoomMessage(StompFrame frame) {
@@ -218,9 +245,17 @@ class Online {
   }
 
   void back() {
+    print("dupa");
     stompClient!.send(
         destination: "/app/back",
         body: json.encode(
             RoomMessage(senderId: userId, roomId: room.id, message: "").toJson()));
+  }
+
+  static void reset() {
+    print("reset");
+    UserDetails.instance.online=false;
+    UserDetails.instance.game=null;
+    _instance=Online._privateConstructor();
   }
 }

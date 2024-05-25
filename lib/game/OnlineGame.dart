@@ -90,6 +90,7 @@ class OnlineGame extends Game{
     Online.instance.addGameLogHandler("WIN", (GameLog log){});
   }
   void onPlayerLeft(String message){
+    print("left from game");
     Online.instance.addGameLogHandler("STARTED_TURN", (GameLog log){});
     Online.instance.addGameLogHandler("HIT", (GameLog log){});
     Online.instance.addGameLogHandler("MISS", (GameLog log){});
@@ -105,7 +106,6 @@ class OnlineGame extends Game{
           room.ownerId=Online.instance.userId;
         }
       }
-      Online.instance.updateRoom();
     }else{
       EndGameUser user = EndGameUser.fromJson(jsonDecode(message));
       Room room=Online.instance.room;
@@ -115,7 +115,6 @@ class OnlineGame extends Game{
           room.ownerId=Online.instance.userId;
         }
       }
-      Online.instance.updateRoom();
       gameFunctions.onPlayerLeft(user.fields);
     }
 
@@ -138,13 +137,14 @@ class OnlineGame extends Game{
 
 
   @override
-  void shoot(int x, int y) {
+  void shoot(Pos? pos) {
     print("shooting in online game");
-    Online.instance.shoot(Pos(x: x, y: y));
+    Online.instance.shoot(pos);
   }
 
   @override
   void returnToRoom(BuildContext context) {
+    Online.instance.updateRoom();
     Online.instance.creator=false;
     UserDetails.instance.game=null;
     UserDetails.instance.board=Board();

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:warships_mobile/components/Button.dart';
 import 'package:warships_mobile/components/TimerWidet.dart';
 import 'package:warships_mobile/game/BoardController.dart';
+import 'package:warships_mobile/models/Pos.dart';
 import 'package:warships_mobile/newBoards/Board.dart';
 import 'package:warships_mobile/newBoards/ConsoleBoard.dart';
 
@@ -13,7 +14,7 @@ class ConsolePanel2 extends StatefulWidget {
   const ConsolePanel2(
       {super.key,
       required this.setMode,
-      required this.handleShoot, required this.mode, required this.board, required this.playerTurn, required this.setPlayerTurn, required this.handleForfeit});
+      required this.handleShoot, required this.mode, required this.board, required this.playerTurn, required this.setPlayerTurn, required this.handleForfeit, required this.time});
 
   final void Function(bool) setMode;
   final Function handleShoot;
@@ -22,6 +23,7 @@ class ConsolePanel2 extends StatefulWidget {
   final bool playerTurn;
   final Function setPlayerTurn;
   final void Function() handleForfeit;
+  final int time;
   @override
   State<ConsolePanel2> createState() => _ConsolePanel2State();
 }
@@ -38,8 +40,8 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
     setState(() {
       widget.setPlayerTurn(false);
       widget.board.disabled=true;
-      widget.board.widget=BoardWidget(size: 400, getFields: widget.board.getFields);
-      widget.handleShoot(x,y);
+      widget.board.widget=BoardWidget(size: 350, getFields: widget.board.getFields);
+      widget.handleShoot(Pos(x: x, y: y));
     });
   }
 
@@ -62,7 +64,7 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
         }
       },
       child: Container(
-        width: 420,
+        width: 370,
         height: 600,
         color: Color.fromRGBO(66, 0, 0, 1),
         child: Column(
@@ -74,8 +76,9 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
                 width: 200,
                 color: Color.fromRGBO(1, 9, 3, 1),
                 child: TimerWidget(
+                  disabled:!widget.playerTurn,
                   size: 50,
-                  time: 0,
+                  time: widget.time,
                 )),
             SizedBox(
               height: 5,
@@ -111,8 +114,8 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
                                 widget.board.selected[0], widget.board.selected[1]);
                           },
                           message: "shoot",
-                          disabled: widget.board.selected.isEmpty,
-                          backGroundColor: widget.board.selected.isEmpty?Color.fromRGBO(29, 79, 2, 0.5):Color.fromRGBO(29, 79, 2, 1.0),
+                          disabled: !(widget.board.selected.isNotEmpty && widget.playerTurn),
+                          backGroundColor: !(widget.board.selected.isNotEmpty && widget.playerTurn)?Color.fromRGBO(29, 79, 2, 0.5):Color.fromRGBO(29, 79, 2, 1.0),
                         ))
                   ],
                 )),

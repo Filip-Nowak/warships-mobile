@@ -35,6 +35,8 @@ class _StartingScreenState extends State<StartingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Modal(child: Label("game starts in $time", fontSize: 40));
+    return PopScope(
+        canPop: false,
+        child: Modal(child: Label("game starts in $time", fontSize: 40)));
   }
 }

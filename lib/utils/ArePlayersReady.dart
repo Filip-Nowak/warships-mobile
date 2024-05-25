@@ -13,7 +13,7 @@ class ArePlayersReady extends Handler{
         return handleNext();
       }
     }
-    return Label("players are not ready", fontSize: 35);
+    return Label("players are not ready", fontSize: 30);
   }
 
 }

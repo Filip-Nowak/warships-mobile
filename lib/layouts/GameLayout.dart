@@ -65,6 +65,8 @@ import 'package:warships_mobile/components/Button.dart';
 import 'package:warships_mobile/components/Modal.dart';
 import 'package:warships_mobile/game/GameFunctions.dart';
 import 'package:warships_mobile/newBoards/BoardWidget.dart';
+import 'package:warships_mobile/utils/Online.dart';
+import 'package:warships_mobile/utils/StopWatch.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
 
 import '../components/GameInfo.dart';
@@ -89,7 +91,7 @@ class _GameLayoutState extends State<GameLayout> {
   bool consoleMode = false;
   SeaBoard seaBoard = SeaBoard(400, UserDetails.instance.board);
   List<int> selected = [];
-  ConsoleBoard consoleBoard = ConsoleBoard(400);
+  ConsoleBoard consoleBoard = ConsoleBoard(350);
   String message = "";
   bool startingScreen = true;
   bool playerTurn = false;
@@ -100,15 +102,18 @@ class _GameLayoutState extends State<GameLayout> {
     });
   }
 
-  void shoot(int x, int y) {
+  void shoot(Pos? pos) {
+    stopwatch.stop();
     setState(() {
+      time=0;
       consoleBoard.shooting = true;
       consoleBoard.disabled = true;
       consoleBoard.update();
     });
 
-    UserDetails.instance.game!.shoot(x, y);
+    UserDetails.instance.game!.shoot(pos);
   }
+
 
   void showStartingScreen() {
     showDialog(
@@ -146,12 +151,17 @@ class _GameLayoutState extends State<GameLayout> {
       consoleMode = true;
       message = "pick field";
       seaBoard.update();
+      time=10;
+      stopwatch.start(10);
     });
     hideStartingScreen();
   }
 
   void startEnemyTurn() {
     setState(() {
+      time=10;
+      stopwatch.start(10);
+      consoleMode=false;
       message = "enemy picking field";
     });
     hideStartingScreen();
@@ -165,7 +175,7 @@ class _GameLayoutState extends State<GameLayout> {
 
       consoleBoard.board.setField(x, y, 1);
       consoleBoard.widget =
-          BoardWidget(size: 400, getFields: consoleBoard.getFields);
+          BoardWidget(size: 350, getFields: consoleBoard.getFields);
     });
   }
 
@@ -253,19 +263,23 @@ class _GameLayoutState extends State<GameLayout> {
   }
 
   void enemyShooting() {
+    stopwatch.stop();
     setState(() {
+      time=0;
       message = "enemy shooting";
     });
     print("enemt shooting");
   }
 
   void enemyForfeit(List<List<int>>fields) {
+    stopwatch.stop();
     Board board=Board();
     board.fields=fields;
     showEndingScreen("you won", "enemy forfeited",SeaBoard(350, board));
   }
 
   void playerForfeit(List<List<int>>fields) {
+    stopwatch.stop();
     Board board=Board();
     board.fields=fields;
     showEndingScreen("you lost", "you forfeited",SeaBoard(350, board));
@@ -276,10 +290,14 @@ class _GameLayoutState extends State<GameLayout> {
   }
 
   void onPlayerLeft(List<List<int>>fields) {
+    stopwatch.stop();
     hideStartingScreen();
     Board board=Board();
     board.fields=fields;
     showEndingScreen("you won", "enemy left",SeaBoard(350, board));
+    if(UserDetails.instance.online){
+      Online.instance.updateRoom();
+    }
   }
 
   void returnToLobby() {
@@ -331,7 +349,20 @@ class _GameLayoutState extends State<GameLayout> {
           ));
         });
   }
-
+  void onTimeChange(int t){
+    setState(() {
+      time=t;
+    });
+  }
+  void onTimeEnd(){
+    if(playerTurn)
+    {
+      playerTurn=false;
+      shoot(null);
+    }
+  }
+  int time=0;
+  late StopWatch stopwatch=StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
   @override
   void initState() {
     super.initState();
@@ -361,48 +392,51 @@ class _GameLayoutState extends State<GameLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(children: [
-        Container(
-          width: double.infinity,
-          color: Color.fromRGBO(30, 109, 226, 1),
-          child: Column(
-            children: [
-              GameInfo(
-                message: message,
-              ),
-              SizedBox(
-                height: 60,
-              ),
-              Label("your ships",
-                  fontSize: 50, color: Color.fromRGBO(5, 50, 128, 1)),
-              SizedBox(
-                height: 20,
-              ),
-              seaBoard.widget,
-            ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Stack(children: [
+          Container(
+            width: double.infinity,
+            color: Color.fromRGBO(30, 109, 226, 1),
+            child: Column(
+              children: [
+                GameInfo(
+                  message: message,
+                ),
+                SizedBox(
+                  height: 60,
+                ),
+                Label("your ships",
+                    fontSize: 50, color: Color.fromRGBO(5, 50, 128, 1)),
+                SizedBox(
+                  height: 20,
+                ),
+                seaBoard.widget,
+              ],
+            ),
           ),
-        ),
-        Positioned(
-          bottom: consoleMode ? 0 : -500,
-          left: MediaQuery.of(context).size.width / 2 - 210,
-          child: ConsolePanel2(
-            setMode: (mode) {
-              setState(() {
-                this.consoleMode = mode;
-              });
-            },
-            board: consoleBoard,
-            mode: false,
-            handleShoot: shoot,
-            playerTurn: playerTurn,
-            setPlayerTurn: (turn) {
-              playerTurn = turn;
-            },
-            handleForfeit: handleForfeitClick,
-          ),
-        )
-      ]),
+          Positioned(
+            bottom: consoleMode ? 0 : -500,
+            left: MediaQuery.of(context).size.width / 2 - 185,
+            child: ConsolePanel2(
+              setMode: (mode) {
+                setState(() {
+                  this.consoleMode = mode;
+                });
+              },
+              board: consoleBoard,
+              mode: false,
+              handleShoot: shoot,
+              playerTurn: playerTurn,
+              setPlayerTurn: (turn) {
+                playerTurn = turn;
+              },
+              handleForfeit: handleForfeitClick, time: time,
+            ),
+          )
+        ]),
+      ),
     );
   }
 }
