@@ -39,7 +39,7 @@ class Online {
     _userId = value;
   }
 
-  final String _url = "http://192.168.1.74:8080";
+  final String _url = "http://192.168.1.208:8080";
   StompClient? stompClient;
   Room _room = Room("x", [], "x");
 
@@ -255,6 +255,7 @@ class Online {
   static void reset() {
     print("reset");
     UserDetails.instance.online=false;
+    UserDetails.instance.submitted=false;
     UserDetails.instance.game=null;
     _instance=Online._privateConstructor();
   }

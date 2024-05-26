@@ -9,6 +9,8 @@ import 'package:warships_mobile/components/TextInputField.dart';
 import 'package:warships_mobile/models/Room.dart';
 import 'package:warships_mobile/utils/Online.dart';
 
+import '../utils/UserDetails.dart';
+
 class JoinRoomLayout extends StatefulWidget {
   const JoinRoomLayout({super.key});
 
@@ -64,6 +66,10 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
     Online.instance.addRoomMessageHandler("ERROR", onError);
     Online.instance.setJoinRoom(onJoin);
   }
+  void backToHome(){
+    Online.instance.deleteSession();
+    Online.reset();
+  }
   bool _isLoading=false;
   @override
   Widget build(BuildContext context) {
@@ -73,8 +79,7 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
         if(xd){
           return;
         }
-        Online.instance.deleteSession();
-        Online.reset();
+        backToHome();
         Navigator.pop(context);
       },
       child: Stack(children: [
@@ -100,7 +105,7 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
                     children: [
                       IconButton(
                           onPressed: () {
-                            Online.instance.deleteSession();
+                            backToHome();
                             Navigator.pop(context);
                           },
                           icon: Icon(

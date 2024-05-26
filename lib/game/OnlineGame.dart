@@ -31,7 +31,7 @@ class OnlineGame extends Game{
     Online.instance.addGameLogHandler("SUNKEN", onSunken);
     Online.instance.addGameLogHandler("ALREADY_HIT", onAlreadyHit);
     Online.instance.addGameLogHandler("SHOOTING", onShooting);
-    Online.instance.addGameLogHandler("WIN", onWin);
+    Online.instance.addRoomMessageHandler("WIN", onWin);
     Online.instance.addRoomMessageHandler("PLAYER_LEFT", onPlayerLeft);
     Online.instance.addRoomMessageHandler("FORFEIT", onForfeit);
 
@@ -80,14 +80,21 @@ class OnlineGame extends Game{
       gameFunctions.enemyShooting();
     }
   }
-  void onWin(GameLog log){
+  void onWin(String message){
     Online.instance.addGameLogHandler("STARTED_TURN", (GameLog log){});
     Online.instance.addGameLogHandler("HIT", (GameLog log){});
     Online.instance.addGameLogHandler("MISS", (GameLog log){});
     Online.instance.addGameLogHandler("SUNKEN", (GameLog log){});
     Online.instance.addGameLogHandler("ALREADY_HIT", (GameLog log){});
     Online.instance.addGameLogHandler("SHOOTING", (GameLog log){});
-    Online.instance.addGameLogHandler("WIN", (GameLog log){});
+    Online.instance.addRoomMessageHandler("WIN", (String xd){});
+
+    EndGameUser user = EndGameUser.fromJson(jsonDecode(message));
+    if(user.id==Online.instance.userId){
+      gameFunctions.playerWin(user.fields);
+    }else{
+      gameFunctions.playerLost(user.fields);
+    }
   }
   void onPlayerLeft(String message){
     print("left from game");
@@ -97,7 +104,7 @@ class OnlineGame extends Game{
     Online.instance.addGameLogHandler("SUNKEN", (GameLog log){});
     Online.instance.addGameLogHandler("ALREADY_HIT", (GameLog log){});
     Online.instance.addGameLogHandler("SHOOTING", (GameLog log){});
-    Online.instance.addGameLogHandler("WIN", (GameLog log){});
+    Online.instance.addRoomMessageHandler("WIN", (String xd){});
     if(json.decode(message) is int){
       Room room=Online.instance.room;
       for(int i=0;i<room.users.length;i++){
@@ -126,7 +133,7 @@ class OnlineGame extends Game{
     Online.instance.addGameLogHandler("SUNKEN", (GameLog log){});
     Online.instance.addGameLogHandler("ALREADY_HIT", (GameLog log){});
     Online.instance.addGameLogHandler("SHOOTING", (GameLog log){});
-    Online.instance.addGameLogHandler("WIN", (GameLog log){});
+    Online.instance.addRoomMessageHandler("WIN", (String xd){});
     EndGameUser user = EndGameUser.fromJson(jsonDecode(msg));
     if(user.id==Online.instance.userId){
       gameFunctions.playerForfeit(user.fields);

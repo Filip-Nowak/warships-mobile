@@ -47,6 +47,7 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
 
   @override
   Widget build(BuildContext context) {
+    print("console render");
     return GestureDetector(
       onVerticalDragDown: (details) {
         distance = 0;

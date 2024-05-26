@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:warships_mobile/components/TimerWidet.dart';
 import 'package:warships_mobile/creator/BottomPanel.dart';
+import 'package:warships_mobile/models/User.dart';
 import 'package:warships_mobile/newBoards/BoardWidget.dart';
 import 'package:warships_mobile/utils/Online.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
@@ -24,7 +25,8 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   int selectedShip = 0;
   List<int> shipsLeft = [1, 2, 3, 4];
   CreatorBoard board = CreatorBoard(400);
-  late StopWatch stopwatch=StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
+  late StopWatch stopwatch =
+      StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
 
   void addShip() {
     setState(() {
@@ -87,6 +89,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
         stopwatch.start(60);
       }
       Online.instance.addRoomMessageHandler("LAUNCH", (message) {
+        UserDetails.instance.submitted = false;
         setState(() {
           _isLoading = false;
         });
@@ -120,26 +123,28 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   }
 
   void onTimeEnd() {
-    start();
+    if (UserDetails.instance.submitted) {
+      start();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return
-      PopScope(
-        canPop: false,
-        onPopInvoked: (xd){
-          if(xd){
-            return;
-          }
-          UserDetails.instance.back();
-        },
-        child: Scaffold(
-            backgroundColor: board.removeMode
-                ? Color.fromRGBO(30, 0, 0, 1)
-                : Color.fromRGBO(0, 24, 1, 1),
-            body: Stack(
-              children: [Container(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (xd) {
+        if (xd) {
+          return;
+        }
+        UserDetails.instance.back();
+      },
+      child: Scaffold(
+          backgroundColor: board.removeMode
+              ? Color.fromRGBO(30, 0, 0, 1)
+              : Color.fromRGBO(0, 24, 1, 1),
+          body: Stack(children: [
+            SingleChildScrollView(
+              child: SizedBox(
                 width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -159,7 +164,11 @@ class _CreatorLayoutState extends State<CreatorLayout> {
                       ],
                     ),
                     const Label("deploy ships", fontSize: 40),
-                    TimerWidget(size: 30, time: time),
+                    TimerWidget(
+                      size: 30,
+                      time: time,
+                      disabled: !UserDetails.instance.online,
+                    ),
                     board.widget,
                     BottomPanel(
                       changeMode: changeMode,
@@ -171,22 +180,22 @@ class _CreatorLayoutState extends State<CreatorLayout> {
                       removeMode: board.removeMode,
                       cancel: cancel,
                     ),
-
                   ],
                 ),
               ),
-                if (_isLoading)
-                  AbsorbPointer(
-                    child: Stack(
-                      children: [
-                        ModalBarrier(
-                            dismissible: false, color: Colors.black.withOpacity(0.8)),
-                        Center(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-
+            ),
+            if (_isLoading)
+              AbsorbPointer(
+                child: Stack(
+                  children: [
+                    ModalBarrier(
+                        dismissible: false,
+                        color: Colors.black.withOpacity(0.8)),
+                    Center(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                             Label(
                               "waiting for enemy",
                               fontSize: 50,
@@ -195,12 +204,12 @@ class _CreatorLayoutState extends State<CreatorLayout> {
                               color: Color.fromRGBO(143, 255, 0, 1.0),
                             )
                           ]),
-                        ),
-                      ],
                     ),
-                  ),
-            ])),
-      );
+                  ],
+                ),
+              ),
+          ])),
+    );
 
     ;
   }

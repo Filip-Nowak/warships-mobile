@@ -13,10 +13,12 @@ class UserDetails{
   UserDetails._privateConstructor();
   static final UserDetails _instance = UserDetails._privateConstructor();
   static UserDetails get instance => _instance;
+  bool submitted=false;
   late Game? game;
   Board board=Board();
   bool online=false;
   void submitShips(Board board, BuildContext context) {
+    submitted=true;
     UserDetails.instance.board=board;
     if(online){
       Online.instance.submitShips(board.fields);
@@ -27,10 +29,11 @@ class UserDetails{
 
   }
   void loadGame(GameFunctions gameFunctions){
+    UserDetails.instance.submitted=false;
     if(online){
       game=OnlineGame(gameFunctions);
     }else{
-      game=BotGame(gameFunctions);
+      game=BotGame(gameFunctions,board);
     }
   }
 

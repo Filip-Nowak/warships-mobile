@@ -200,10 +200,11 @@ class CreatorBoard extends BoardManager {
   }
   void cancel(){
     for(List<int> field in deployingShip){
-      board.setField(field[0], field[1], 0);
       board.forCrossFields(field[0], field[1], (x, y) {
-        board.setField(x, y, 0);
-        if((board.getField(x,y)==3||board.getField(x,y)==2)&&board.getField(x, y)==4){
+        if(board.getField(x, y)==2){
+          board.setField(x, y, 0);
+        }
+        if((board.getField(x,y)==3||board.getField(x,y)==2)){
           board.setField(x, y, 0);
         }
       });

@@ -1,7 +1,9 @@
 import '../models/Pos.dart';
 
 class GameFunctions {
-  const GameFunctions( {
+  const GameFunctions({
+    required this.playerWin,
+    required this.playerLost,
     required this.onPlayerLeft,
     required this.enemyForfeit,
     required this.playerForfeit,
@@ -34,4 +36,8 @@ class GameFunctions {
   final void Function(List<List<int>>) playerForfeit;
   final void Function(List<List<int>>) enemyForfeit;
   final void Function(List<List<int>>) onPlayerLeft;
+
+  final void Function(List<List<int>> fields) playerWin;
+
+  final void Function(List<List<int>> fields) playerLost;
 }

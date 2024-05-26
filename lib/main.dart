@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:warships_mobile/layouts/GameLayout.dart';
 import 'package:warships_mobile/layouts/JoinRoomLayout.dart';
 import 'package:warships_mobile/layouts/RoomLayout.dart';
+import 'package:warships_mobile/utils/Bot.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
 
 import 'layouts/CreatorLayout.dart';
 import 'layouts/HomeLayout.dart';
 
 void main() {
-  print("start");
   runApp(MaterialApp(
     initialRoute: "/home",
     routes: {

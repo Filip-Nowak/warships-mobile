@@ -1,7 +1,14 @@
 class Board {
   List<List<int>> fields =
       List.generate(10, (_) => List.generate(10, (_) => 0));
-
+  Board(){}
+  Board.clone(Board board){
+    for(int i=0;i<10;i++){
+      for(int j=0;j<10;j++){
+        fields[i][j]=board.fields[i][j];
+      }
+    }
+  }
   void setField(int x, int y, int value) {
     if (!checkField(x, y)) {
       return;
@@ -59,8 +66,12 @@ class Board {
   void transformToSea() {
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
-        if (fields[i][j] == 4) fields[i][j] = 0;
+        if (fields[i][j] == 4 || fields[i][j] == 3 || fields[i][j]==2) fields[i][j] = 0;
       }
     }
+  }
+
+  Board clone() {
+    return Board.clone(this);
   }
 }

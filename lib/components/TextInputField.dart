@@ -25,12 +25,16 @@ class _TextInputFieldState extends State<TextInputField> {
                 border: Border.all(width: 5, color: Colors.black)),
             width: 235,
             child: TextField(
+              maxLength: 15,
+
               style: TextStyle(
                 fontSize: widget.fontSize.toDouble(),
                 fontFamily: "arcade",
                 color: const Color.fromRGBO(143, 255, 0, 1.0),
+
               ),
               decoration: InputDecoration(
+                counterText:"",
 
               ),
               onChanged: (text){

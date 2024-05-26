@@ -115,6 +115,7 @@ class _RoomLayoutState extends State<RoomLayout> {
   }
 
   void onBack(String msg){
+    UserDetails.instance.submitted=false;
     UserDetails.instance.board=Board();
     Online.instance.creator=false;
     Navigator.pop(context);

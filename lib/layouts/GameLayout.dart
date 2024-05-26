@@ -1,64 +1,3 @@
-// import 'package:flutter/cupertino.dart';
-// import 'package:flutter/material.dart';
-// import 'package:warships_mobile/game/ConsolePanel2.dart';
-// import 'package:warships_mobile/newBoards/SeaBoard.dart';
-// import 'package:warships_mobile/utils/UserDetails.dart';
-//
-// import '../components/GameInfo.dart';
-// import '../components/Label.dart';
-//
-// class GameLayout extends StatefulWidget {
-//   const GameLayout({super.key});
-//
-//   @override
-//   State<GameLayout> createState() => _GameLayoutState();
-// }
-//
-// class _GameLayoutState extends State<GameLayout> {
-//   String message="";
-//   SeaBoard playerBoard=SeaBoard(400, UserDetails.instance.board);
-//   bool mode=false;
-//   void setMode(bool mode){
-//     setState(() {
-//       this.mode=mode;
-//     });
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(body:
-//     Container(
-//       color: Color.fromRGBO(30, 109, 226, 1),
-//       child: Stack(children: [
-//         Column(children: [
-//           GameInfo(
-//             message: message,
-//           ),
-//         Container(
-//           width: double.infinity,
-//           color: Color.fromRGBO(30, 109, 226, 1),
-//           child: Column(
-//             children: [
-//               SizedBox(
-//                 height: 60,
-//               ),
-//               Label("your ships",
-//                   fontSize: 50, color: Color.fromRGBO(5, 50, 128, 1)),
-//               SizedBox(
-//                 height: 20,
-//               ),
-//               playerBoard.widget,
-//             ],
-//           ),
-//         ),
-//         ]),
-//         ConsolePanel2(setMode: setMode, handleShoot: (){}, mode: mode,)
-//       ]),
-//     )
-//
-//     );
-//   }
-// }
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:warships_mobile/components/Button.dart';
@@ -105,22 +44,35 @@ class _GameLayoutState extends State<GameLayout> {
   void shoot(Pos? pos) {
     stopwatch.stop();
     setState(() {
-      time=0;
-      consoleBoard.shooting = true;
+      time = 0;
+      if (selected.isNotEmpty) {
+        consoleBoard.shooting = true;
+      }
       consoleBoard.disabled = true;
       consoleBoard.update();
     });
-
+    print("shooting...");
     UserDetails.instance.game!.shoot(pos);
   }
 
-
   void showStartingScreen() {
+    List<String> players=[];
+    if(UserDetails.instance.online)
+    {
+      for(int i=0;i<2;i++){
+        players.add(Online.instance.room.users[i].nickname);
+      }
+    }else{
+      players=["you","bot"];
+    }
+
+
+
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (BuildContext ctx) {
-          return StartingScreen();
+          return StartingScreen(players: players,);
         });
   }
 
@@ -131,17 +83,24 @@ class _GameLayoutState extends State<GameLayout> {
     }
   }
 
-  void showEndingScreen(String title, String message,SeaBoard enemyBoard) {
+  void showEndingScreen(String title, String message, SeaBoard enemyBoard) {
+    print("show ending");
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
+          print("in builder 2");
           return EndingScreen(
             title: title,
             message: message,
-            returnToRoom: returnToLobby, enemyBoard: enemyBoard,
+            returnToRoom: returnToLobby,
+            enemyBoard: enemyBoard,
           );
         });
+    // showDialog(context: context, builder: (BuildContext xd){
+    //   print("building xd");
+    //   return Dialog(child: Text("xd"),);
+    // });
   }
 
   void startPlayerTurn() {
@@ -151,17 +110,21 @@ class _GameLayoutState extends State<GameLayout> {
       consoleMode = true;
       message = "pick field";
       seaBoard.update();
-      time=10;
-      stopwatch.start(10);
+      if (UserDetails.instance.online) {
+        time = 10;
+        stopwatch.start(10);
+      }
     });
     hideStartingScreen();
   }
 
   void startEnemyTurn() {
     setState(() {
-      time=10;
-      stopwatch.start(10);
-      consoleMode=false;
+      if (UserDetails.instance.online) {
+        time = 10;
+        stopwatch.start(10);
+      }
+      consoleMode = false;
       message = "enemy picking field";
     });
     hideStartingScreen();
@@ -188,6 +151,7 @@ class _GameLayoutState extends State<GameLayout> {
   }
 
   void playerMiss(Pos? pos) {
+    print("playerMiss");
     setState(() {
       consoleBoard.selected.clear();
       consoleBoard.shooting = false;
@@ -203,6 +167,7 @@ class _GameLayoutState extends State<GameLayout> {
       consoleBoard.board.setField(pos.x, pos.y, 3);
       consoleBoard.update();
     }
+
   }
 
   void enemyMiss(Pos? pos) {
@@ -224,19 +189,33 @@ class _GameLayoutState extends State<GameLayout> {
       consoleBoard.selected.clear();
       consoleBoard.shooting = false;
       message = "enemy ship got sunken";
+      sunkShip(consoleBoard.board, x, y, 1, 2);
     });
     consoleBoard.board.setField(x, y, 2);
-    print("player sunken");
     consoleBoard.update();
   }
 
   void enemySunken(int x, int y) {
     setState(() {
       message = "your ship got sunken";
+      sunkShip(seaBoard.board, x, y, 2, 3);
     });
     seaBoard.board.setField(x, y, 3);
     print("enemy sunken");
     seaBoard.update();
+  }
+
+  Board sunkShip(Board board, int x, int y, int hit, int sunken) {
+    xd(x, y) {
+      if (board.getField(x, y) == hit) {
+        board.setField(x, y, sunken);
+        board.forCrossFields(x, y, xd);
+      }
+    }
+
+    board.setField(x, y, sunken);
+    board.forCrossFields(x, y, xd);
+    return board;
   }
 
   void enemyAlreadyHit(int x, int y) {
@@ -265,39 +244,53 @@ class _GameLayoutState extends State<GameLayout> {
   void enemyShooting() {
     stopwatch.stop();
     setState(() {
-      time=0;
+      time = 0;
       message = "enemy shooting";
     });
     print("enemt shooting");
   }
 
-  void enemyForfeit(List<List<int>>fields) {
+  void enemyForfeit(List<List<int>> fields) {
     stopwatch.stop();
-    Board board=Board();
-    board.fields=fields;
-    showEndingScreen("you won", "enemy forfeited",SeaBoard(350, board));
+    Board board = Board();
+    board.fields = fields;
+    showEndingScreen("you won", "enemy forfeited", SeaBoard(350, board));
   }
 
-  void playerForfeit(List<List<int>>fields) {
+  void playerForfeit(List<List<int>> fields) {
     stopwatch.stop();
-    Board board=Board();
-    board.fields=fields;
-    showEndingScreen("you lost", "you forfeited",SeaBoard(350, board));
+    Board board = Board();
+    board.fields = fields;
+    showEndingScreen("you lost", "you forfeited", SeaBoard(350, board));
   }
 
   void onReturnToLobby() {
     Navigator.pop(context);
   }
 
-  void onPlayerLeft(List<List<int>>fields) {
+  void onPlayerLeft(List<List<int>> fields) {
     stopwatch.stop();
     hideStartingScreen();
-    Board board=Board();
-    board.fields=fields;
-    showEndingScreen("you won", "enemy left",SeaBoard(350, board));
-    if(UserDetails.instance.online){
+    Board board = Board();
+    board.fields = fields;
+    showEndingScreen("you won", "enemy left", SeaBoard(350, board));
+    if (UserDetails.instance.online) {
       Online.instance.updateRoom();
     }
+  }
+
+  void playerWin(List<List<int>> fields) {
+    stopwatch.stop();
+    Board board = Board();
+    board.fields = fields;
+    showEndingScreen("you won", "", SeaBoard(350, board));
+  }
+
+  void playerLost(List<List<int>> fields) {
+    stopwatch.stop();
+    Board board = Board();
+    board.fields = fields;
+    showEndingScreen("you lost", "", SeaBoard(350, board));
   }
 
   void returnToLobby() {
@@ -305,9 +298,11 @@ class _GameLayoutState extends State<GameLayout> {
   }
 
   void handleForfeitClick() {
+    print("showing screen");
     showDialog(
         context: context,
         builder: (BuildContext context) {
+          print("in builder");
           return Modal(
               child: Container(
             child: Column(
@@ -330,8 +325,8 @@ class _GameLayoutState extends State<GameLayout> {
                     ),
                     ElevatedButton(
                         onPressed: () {
-                          UserDetails.instance.game!.forfeit();
                           Navigator.pop(context);
+                          UserDetails.instance.game!.forfeit();
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
@@ -349,26 +344,35 @@ class _GameLayoutState extends State<GameLayout> {
           ));
         });
   }
-  void onTimeChange(int t){
+
+  void onTimeChange(int t) {
     setState(() {
-      time=t;
+      time = t;
     });
   }
-  void onTimeEnd(){
-    if(playerTurn)
-    {
-      playerTurn=false;
-      shoot(null);
+
+  void onTimeEnd() {
+    if (playerTurn) {
+      setState(() {
+        playerTurn = false;
+        selected = [];
+        consoleBoard.setSelected(selected);
+        shoot(null);
+      });
     }
   }
-  int time=0;
-  late StopWatch stopwatch=StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
+
+  int time = 0;
+  late StopWatch stopwatch =
+      StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
+
   @override
   void initState() {
     super.initState();
     consoleBoard.setChangeState(changeState);
     consoleBoard.setSelected(selected);
     UserDetails.instance.loadGame(GameFunctions(
+      playerWin: playerWin,
       startPlayerTurn: startPlayerTurn,
       startEnemyTurn: startEnemyTurn,
       enemyHit: enemyHit,
@@ -384,6 +388,7 @@ class _GameLayoutState extends State<GameLayout> {
       enemyForfeit: enemyForfeit,
       playerForfeit: playerForfeit,
       onPlayerLeft: onPlayerLeft,
+      playerLost: playerLost,
     ));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showStartingScreen();
@@ -432,7 +437,8 @@ class _GameLayoutState extends State<GameLayout> {
               setPlayerTurn: (turn) {
                 playerTurn = turn;
               },
-              handleForfeit: handleForfeitClick, time: time,
+              handleForfeit: handleForfeitClick,
+              time: time,
             ),
           )
         ]),
