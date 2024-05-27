@@ -10,7 +10,8 @@ class Field extends StatelessWidget {
   final bool disabled;
   final Function onClick;
   final bool blink;
-
+  final double width;
+  final double height;
   const Field({
     super.key,
     required this.backgroundColor,
@@ -19,7 +20,7 @@ class Field extends StatelessWidget {
     required this.y,
     required this.disabled,
     required this.onClick,
-    this.blink = false,
+    this.blink = false, required this.width, required this.height,
   });
 
   handleClick() {

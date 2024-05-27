@@ -24,7 +24,7 @@ class OnlineGame extends Game{
 
 
 
-  OnlineGame(super.gameFunctions){
+  OnlineGame(super.gameFunctions, ){
     Online.instance.addGameLogHandler("STARTED_TURN", onStartedTurn);
     Online.instance.addGameLogHandler("HIT", onHit);
     Online.instance.addGameLogHandler("MISS", onMiss);

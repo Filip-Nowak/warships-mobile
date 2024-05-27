@@ -63,10 +63,12 @@ class Board {
     return output;
   }
 
-  void transformToSea() {
+  void  transformToSea() {
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
-        if (fields[i][j] == 4 || fields[i][j] == 3 || fields[i][j]==2) fields[i][j] = 0;
+        if (fields[i][j] == 4 || fields[i][j] == 3 || fields[i][j]==2) {
+          fields[i][j] = 0;
+        }
       }
     }
   }

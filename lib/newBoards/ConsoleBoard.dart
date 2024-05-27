@@ -45,7 +45,7 @@ class ConsoleBoard extends BoardManager{
             }else{
               border=Border.all(width: 5,color: Colors.black);
             }
-            fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border,));
+            fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border, width: size/10, height: size/10,));
           }else{
             bool blink=false;
             if(x==selected[0]&&y==selected[1]){
@@ -54,7 +54,7 @@ class ConsoleBoard extends BoardManager{
             }else{
               border=Border.all(width: 5,color: Colors.black);
             }
-            fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border,blink: blink,));
+            fields.add(Field(backgroundColor: color, x: x, y: y, disabled: false, onClick: onClick,border: border,blink: blink,  width: size/10, height: size/10,));
 
           }
           continue;
@@ -66,7 +66,7 @@ class ConsoleBoard extends BoardManager{
           y: y,
           disabled: false,
           onClick: onClick,
-          border: Border.all(width: 5,color: Colors.black),
+          border: Border.all(width: 5,color: Colors.black), width: size/10, height: size/10,
         ));
       }
     }
@@ -79,7 +79,7 @@ class ConsoleBoard extends BoardManager{
       selected.add(x);
       selected.add(y);
       changeState((){
-        widget=BoardWidget(size: 350, getFields: getFields);
+        widget=BoardWidget(size: size, getFields: getFields);
       });
     }else{
       print(disabled);

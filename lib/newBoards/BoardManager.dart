@@ -7,10 +7,11 @@ abstract class BoardManager{
   Board board=Board();
   bool disabled=false;
   Function changeState = () {};
-  final int size;
+  int size;
   BoardWidget widget= BoardWidget(size: 0, getFields: (){},);
   List<Field> getFields();
   BoardManager (this.size){
+    size=(size / 10).ceil() * 10;
     widget=BoardWidget(size: size, getFields: getFields);
   }
   void setChangeState(Function callback) {

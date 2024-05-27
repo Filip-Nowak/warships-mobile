@@ -7,6 +7,7 @@ import 'package:warships_mobile/components/TimerWidet.dart';
 import 'package:warships_mobile/creator/BottomPanel.dart';
 import 'package:warships_mobile/models/User.dart';
 import 'package:warships_mobile/newBoards/BoardWidget.dart';
+import 'package:warships_mobile/utils/Multiplier.dart';
 import 'package:warships_mobile/utils/Online.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
 
@@ -24,7 +25,7 @@ class CreatorLayout extends StatefulWidget {
 class _CreatorLayoutState extends State<CreatorLayout> {
   int selectedShip = 0;
   List<int> shipsLeft = [1, 2, 3, 4];
-  CreatorBoard board = CreatorBoard(400);
+  CreatorBoard board=CreatorBoard(400);
   late StopWatch stopwatch =
       StopWatch(onTimeChange: onTimeChange, onTimeEnd: onTimeEnd);
 
@@ -40,7 +41,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
     setState(() {
       board.setSelectedShip(newShip);
       selectedShip = newShip;
-      board.widget = BoardWidget(size: 400, getFields: board.getFields);
+      board.widget = BoardWidget(size: MediaQuery.of(context).size.width.toInt(), getFields: board.getFields);
     });
   }
 
@@ -78,26 +79,34 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   @override
   void initState() {
     super.initState();
-    board.setChangeState(changeState);
-    board.setAddShip(addShip);
-    board.setRemoveShip(removeShip);
-    print(UserDetails.instance.online);
-    if (UserDetails.instance.online) {
-      print('xd');
-      Online.instance.creator = true;
-      if (Online.instance.creator) {
-        stopwatch.start(60);
-      }
-      Online.instance.addRoomMessageHandler("LAUNCH", (message) {
-        UserDetails.instance.submitted = false;
-        setState(() {
-          _isLoading = false;
-        });
-        stopwatch.stop();
-        Navigator.pop(context);
-        Navigator.pushNamed(context, "/game");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        board = CreatorBoard(MediaQuery.of(context).size.width.toInt()-10);
+        board.setChangeState(changeState);
+        board.setAddShip(addShip);
+        board.setRemoveShip(removeShip);
+        print(UserDetails.instance.online);
+        if (UserDetails.instance.online) {
+          print('xd');
+          Online.instance.creator = true;
+          if (Online.instance.creator) {
+            stopwatch.start(60);
+          }
+          Online.instance.addRoomMessageHandler("LAUNCH", (message) {
+            UserDetails.instance.submitted = false;
+            UserDetails.instance.starts=message==Online.instance.room.users[0].id;
+            setState(() {
+              _isLoading = false;
+            });
+            stopwatch.stop();
+            Navigator.pop(context);
+            Navigator.pushNamed(context, "/game");
+          });
+        }
       });
-    }
+
+    });
+
   }
 
   void removeShip(int size) {
@@ -109,7 +118,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   void cancel() {
     setState(() {
       board.cancel();
-      board.widget = BoardWidget(size: 400, getFields: board.getFields);
+      board.widget = BoardWidget(size: MediaQuery.of(context).size.width.toInt(), getFields: board.getFields);
     });
   }
 
@@ -123,13 +132,14 @@ class _CreatorLayoutState extends State<CreatorLayout> {
   }
 
   void onTimeEnd() {
-    if (UserDetails.instance.submitted) {
+    if (!UserDetails.instance.submitted) {
       start();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    double multiplier=Multiplier.getMultiplier(context);
     return PopScope(
       canPop: false,
       onPopInvoked: (xd) {
@@ -153,6 +163,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
                       height: 10,
                     ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
                             onPressed: UserDetails.instance.back,
@@ -160,15 +171,23 @@ class _CreatorLayoutState extends State<CreatorLayout> {
                               Icons.arrow_back,
                               size: 50,
                               color: Color.fromRGBO(143, 255, 0, 1.0),
-                            ))
+                            )),
+                        multiplier!=1?TimerWidget(
+                          dangerZone: 15,
+                          size: 30,
+                          time: time,
+                          disabled: !UserDetails.instance.online,
+                        ):SizedBox(),
+                        SizedBox(width: 50,)
                       ],
                     ),
-                    const Label("deploy ships", fontSize: 40),
-                    TimerWidget(
+                    multiplier==1?const Label("deploy ships", fontSize: 40):const SizedBox(),
+                    multiplier==1?TimerWidget(
+                      dangerZone: 15,
                       size: 30,
                       time: time,
                       disabled: !UserDetails.instance.online,
-                    ),
+                    ):SizedBox(),
                     board.widget,
                     BottomPanel(
                       changeMode: changeMode,
@@ -179,6 +198,7 @@ class _CreatorLayoutState extends State<CreatorLayout> {
                       shipsLeft: shipsLeft,
                       removeMode: board.removeMode,
                       cancel: cancel,
+                      multiplier:multiplier
                     ),
                   ],
                 ),

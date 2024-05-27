@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:warships_mobile/components/Button.dart';
 import 'package:warships_mobile/components/Modal.dart';
 import 'package:warships_mobile/game/GameFunctions.dart';
@@ -18,6 +19,7 @@ import '../models/Pos.dart';
 import '../newBoards/Board.dart';
 import '../newBoards/ConsoleBoard.dart';
 import '../newBoards/SeaBoard.dart';
+import '../utils/Multiplier.dart';
 
 class GameLayout extends StatefulWidget {
   const GameLayout({super.key});
@@ -28,12 +30,13 @@ class GameLayout extends StatefulWidget {
 
 class _GameLayoutState extends State<GameLayout> {
   bool consoleMode = false;
-  SeaBoard seaBoard = SeaBoard(400, UserDetails.instance.board);
+  SeaBoard seaBoard = SeaBoard(200, UserDetails.instance.board);
   List<int> selected = [];
   ConsoleBoard consoleBoard = ConsoleBoard(350);
   String message = "";
   bool startingScreen = true;
   bool playerTurn = false;
+
 
   void changeState(Function callback) {
     setState(() {
@@ -56,23 +59,22 @@ class _GameLayoutState extends State<GameLayout> {
   }
 
   void showStartingScreen() {
-    List<String> players=[];
-    if(UserDetails.instance.online)
-    {
-      for(int i=0;i<2;i++){
+    List<String> players = [];
+    if (UserDetails.instance.online) {
+      for (int i = 0; i < 2; i++) {
         players.add(Online.instance.room.users[i].nickname);
       }
-    }else{
-      players=["you","bot"];
+    } else {
+      players = ["you", "bot"];
     }
-
-
 
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (BuildContext ctx) {
-          return StartingScreen(players: players,);
+          return StartingScreen(
+            players: players, starts: UserDetails.instance.starts!,
+          );
         });
   }
 
@@ -137,8 +139,9 @@ class _GameLayoutState extends State<GameLayout> {
       consoleBoard.selected.clear();
 
       consoleBoard.board.setField(x, y, 1);
-      consoleBoard.widget =
-          BoardWidget(size: 350, getFields: consoleBoard.getFields);
+      consoleBoard.widget = BoardWidget(
+          size: (MediaQuery.of(context).size.width * 0.95 * 0.95).toInt(),
+          getFields: consoleBoard.getFields);
     });
   }
 
@@ -167,7 +170,6 @@ class _GameLayoutState extends State<GameLayout> {
       consoleBoard.board.setField(pos.x, pos.y, 3);
       consoleBoard.update();
     }
-
   }
 
   void enemyMiss(Pos? pos) {
@@ -254,14 +256,16 @@ class _GameLayoutState extends State<GameLayout> {
     stopwatch.stop();
     Board board = Board();
     board.fields = fields;
-    showEndingScreen("you won", "enemy forfeited", SeaBoard(350, board));
+    showEndingScreen("you won", "enemy forfeited",
+        SeaBoard((MediaQuery.of(context).size.width * 0.7).toInt(), board));
   }
 
   void playerForfeit(List<List<int>> fields) {
     stopwatch.stop();
     Board board = Board();
     board.fields = fields;
-    showEndingScreen("you lost", "you forfeited", SeaBoard(350, board));
+    showEndingScreen("you lost", "you forfeited",
+        SeaBoard((MediaQuery.of(context).size.width * 0.7).toInt(), board));
   }
 
   void onReturnToLobby() {
@@ -273,7 +277,8 @@ class _GameLayoutState extends State<GameLayout> {
     hideStartingScreen();
     Board board = Board();
     board.fields = fields;
-    showEndingScreen("you won", "enemy left", SeaBoard(350, board));
+    showEndingScreen("you won", "enemy left",
+        SeaBoard((MediaQuery.of(context).size.width * 0.7).toInt(), board));
     if (UserDetails.instance.online) {
       Online.instance.updateRoom();
     }
@@ -283,14 +288,16 @@ class _GameLayoutState extends State<GameLayout> {
     stopwatch.stop();
     Board board = Board();
     board.fields = fields;
-    showEndingScreen("you won", "", SeaBoard(350, board));
+    showEndingScreen("you won", "",
+        SeaBoard((MediaQuery.of(context).size.width * 0.7).toInt(), board));
   }
 
   void playerLost(List<List<int>> fields) {
     stopwatch.stop();
     Board board = Board();
     board.fields = fields;
-    showEndingScreen("you lost", "", SeaBoard(350, board));
+    showEndingScreen("you lost", "",
+        SeaBoard((MediaQuery.of(context).size.width * 0.7).toInt(), board));
   }
 
   void returnToLobby() {
@@ -298,18 +305,17 @@ class _GameLayoutState extends State<GameLayout> {
   }
 
   void handleForfeitClick() {
-    print("showing screen");
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          print("in builder");
           return Modal(
               child: Container(
             child: Column(
               children: [
-                Label("are you sure?", fontSize: 40),
+                Label("are you sure?",
+                    fontSize: (40 * Multiplier.getMultiplier(context)).toInt()),
                 SizedBox(
-                  height: 70,
+                  height: 70 * Multiplier.getMultiplier(context),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -369,8 +375,7 @@ class _GameLayoutState extends State<GameLayout> {
   @override
   void initState() {
     super.initState();
-    consoleBoard.setChangeState(changeState);
-    consoleBoard.setSelected(selected);
+
     UserDetails.instance.loadGame(GameFunctions(
       playerWin: playerWin,
       startPlayerTurn: startPlayerTurn,
@@ -391,12 +396,21 @@ class _GameLayoutState extends State<GameLayout> {
       playerLost: playerLost,
     ));
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        consoleBoard = ConsoleBoard(
+            (MediaQuery.of(context).size.width * 0.95 * 0.95).toInt());
+        seaBoard = SeaBoard((MediaQuery.of(context).size.width * 0.90).toInt(),
+            UserDetails.instance.board);
+        consoleBoard.setChangeState(changeState);
+        consoleBoard.setSelected(selected);
+      });
       showStartingScreen();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    double multiplier = Multiplier.getMultiplier(context);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -410,20 +424,34 @@ class _GameLayoutState extends State<GameLayout> {
                   message: message,
                 ),
                 SizedBox(
-                  height: 60,
+                  height: 40 * multiplier.toDouble(),
                 ),
                 Label("your ships",
-                    fontSize: 50, color: Color.fromRGBO(5, 50, 128, 1)),
+                    fontSize: (50 * multiplier).toInt(),
+                    color: Color.fromRGBO(5, 50, 128, 1)),
                 SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
-                seaBoard.widget,
+                Container(
+                    width: MediaQuery.of(context).size.width * 0.90 + 20,
+                    height: MediaQuery.of(context).size.width * 0.90 + 20,
+                    decoration: BoxDecoration(
+                      color: Color.fromRGBO(30, 126, 255, 1),
+                      border: Border.all(color: Color.fromRGBO(0, 0, 0, 0.3),width: 5),
+                    ),
+                    child: Center(
+                        child: Container(
+                            color: Color.fromRGBO(30, 126, 255, 1),
+                            child: seaBoard.widget))),
               ],
             ),
           ),
           Positioned(
-            bottom: consoleMode ? 0 : -500,
-            left: MediaQuery.of(context).size.width / 2 - 185,
+            bottom: consoleMode
+                ? 0
+                : -MediaQuery.of(context).size.height * 0.7 + (multiplier==1?100:85),
+            left: MediaQuery.of(context).size.width / 2 -
+                (MediaQuery.of(context).size.width * 0.95 / 2),
             child: ConsolePanel2(
               setMode: (mode) {
                 setState(() {

@@ -17,7 +17,7 @@ class SeaBoard extends BoardManager {
         Color color;
         int? value = board.getField(x, y);
         if (value == 0) {
-          color = const Color.fromRGBO(30, 126, 255, 0.5);
+          color = const Color.fromRGBO(30, 126, 255, 1);
         } else if (value == 1) {
           color = const Color.fromRGBO(141, 141, 141, 1);
         } else if (value == 2) {
@@ -33,7 +33,7 @@ class SeaBoard extends BoardManager {
           x: x,
           y: y,
           disabled: true,
-          onClick: (){},
+          onClick: (){}, width: size/10, height: size/10,
         ));
       }
     }

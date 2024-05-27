@@ -39,7 +39,7 @@ class Online {
     _userId = value;
   }
 
-  final String _url = "http://192.168.1.208:8080";
+  final String _url = "http://:8080";
   StompClient? stompClient;
   Room _room = Room("x", [], "x");
 

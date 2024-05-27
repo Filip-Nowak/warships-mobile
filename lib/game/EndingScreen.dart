@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:warships_mobile/components/Button.dart';
 import 'package:warships_mobile/newBoards/SeaBoard.dart';
+import 'package:warships_mobile/utils/Multiplier.dart';
 
 import '../components/Label.dart';
 import '../components/Modal.dart';
@@ -17,15 +18,15 @@ class EndingScreen extends StatelessWidget {
       return Modal(
         child: Column(
         children: [
-          SizedBox(height: 30,),
-          Label("enemy ships", fontSize: 40),
+          SizedBox(height: 30*Multiplier.getMultiplier(context),),
+          Label("enemy ships", fontSize: (40*Multiplier.getMultiplier(context)).toInt()),
           enemyBoard.widget,
           SizedBox(height: 20,),
           Button(onPressed: (){Navigator.pop(context);}, message: "close",fontSize: 40,)
         ],
       ),
         backgroundColor: Color.fromRGBO(30, 109, 226, 1),
-        height: 550,
+        height: (550*Multiplier.getMultiplier(context)).toInt(),
         width: 400,
       );
     });

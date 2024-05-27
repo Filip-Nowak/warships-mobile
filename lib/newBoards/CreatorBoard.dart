@@ -17,6 +17,7 @@ class CreatorBoard extends BoardManager {
 
   @override
   List<Field> getFields() {
+    print(size);
     List<Field> fields = [];
     for (int y = 0; y < 10; y++) {
       for (int x = 0; x < 10; x++) {
@@ -56,13 +57,13 @@ class CreatorBoard extends BoardManager {
                 disabled: disabled || fieldDisabled,
                 onClick: onClick,
                 border:
-                    Border.all(width: 2, color: Color.fromRGBO(0, 24, 1, 1)))
+                    Border.all(width: 2, color: Color.fromRGBO(0, 24, 1, 1)), width: size/10, height: size/10,)
             : Field(
                 backgroundColor: color,
                 x: x,
                 y: y,
                 disabled: disabled || fieldDisabled,
-                onClick: onClick,
+                onClick: onClick, width: size/10, height: size/10,
               ));
       }
     }
@@ -200,10 +201,8 @@ class CreatorBoard extends BoardManager {
   }
   void cancel(){
     for(List<int> field in deployingShip){
+      board.setField(field[0],field[1],0);
       board.forCrossFields(field[0], field[1], (x, y) {
-        if(board.getField(x, y)==2){
-          board.setField(x, y, 0);
-        }
         if((board.getField(x,y)==3||board.getField(x,y)==2)){
           board.setField(x, y, 0);
         }

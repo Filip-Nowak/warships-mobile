@@ -7,6 +7,7 @@ import 'package:warships_mobile/components/Button.dart';
 import 'package:warships_mobile/components/Label.dart';
 import 'package:warships_mobile/components/Modal.dart';
 import 'package:warships_mobile/components/TextInputField.dart';
+import 'package:warships_mobile/utils/Multiplier.dart';
 import 'package:warships_mobile/utils/Online.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
 
@@ -66,13 +67,14 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   @override
   Widget build(BuildContext context) {
+    double multiplier=Multiplier.getMultiplier(context);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
     return Stack(
-      children: [Scaffold(
-
+      children: [
+        Scaffold(
           backgroundColor: Color.fromRGBO(30, 0, 116, 1),
           body: SingleChildScrollView(
             child: Container(
@@ -81,13 +83,13 @@ class _HomeLayoutState extends State<HomeLayout> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 200,),
-                  const Label(
+                  SizedBox(height: 200*multiplier.toDouble(),),
+                  Label(
                     "warships",
-                    fontSize: 70,
+                    fontSize: (70*multiplier).toInt(),
                   ),
-                  const SizedBox(
-                    height: 300,
+                   SizedBox(
+                    height: 300*multiplier.toDouble(),
                   ),
                   Button(
                     onPressed: () {
@@ -101,10 +103,10 @@ class _HomeLayoutState extends State<HomeLayout> {
                                 child: Column(children: [
                                   Label(
                                     "type in your nickname",
-                                    fontSize: 40,
+                                    fontSize: (40*multiplier).toInt(),
                                   ),
                                   TextInputField(
-                                    fontSize: 40,
+                                    fontSize: (40*multiplier).toInt(),
                                     onClick: (text) {
                                       handleOnlineClick(text, context);
                                     },
@@ -115,15 +117,16 @@ class _HomeLayoutState extends State<HomeLayout> {
                           });
                     },
                     message: "play online",
-                    fontSize: 50,
+                    fontSize: (50*multiplier).toInt(),
                   ),
-                  const SizedBox(height: 30),
+                   SizedBox(height: 30*multiplier.toDouble()),
                   Button(
                     onPressed: () {
                       handleBotClick(context);
                     },
                     message: "play vs bot",
-                    fontSize: 50,
+                    fontSize: (50*multiplier).toInt(),
+
                   ),
                 ],
               ),

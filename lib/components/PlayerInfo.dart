@@ -12,14 +12,14 @@ class PlayerInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 190,
+      width: MediaQuery.of(context).size.width*0.45,
       child: Column(
         children: [
           Container(
               height: 70,
               child: Center(
                   child: Label(nickname.isNotEmpty ? nickname : "waiting",
-                      fontSize: nickname.length < 5
+                      fontSize: nickname.isEmpty?30:nickname.length < 5
                           ? 40
                           : (190 / nickname.length.floor()).toInt(),
                   color: Color.fromRGBO(143, 255, 0, nickname.isEmpty?0.5:1),))),

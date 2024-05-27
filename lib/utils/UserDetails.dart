@@ -10,6 +10,8 @@ import 'package:warships_mobile/utils/Online.dart';
 
 
 class UserDetails{
+  bool? starts;
+
   UserDetails._privateConstructor();
   static final UserDetails _instance = UserDetails._privateConstructor();
   static UserDetails get instance => _instance;
@@ -33,7 +35,8 @@ class UserDetails{
     if(online){
       game=OnlineGame(gameFunctions);
     }else{
-      game=BotGame(gameFunctions,board);
+      starts=true;
+      game=BotGame(gameFunctions, board);
     }
   }
 

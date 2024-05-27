@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:warships_mobile/components/Label.dart';
 import 'package:warships_mobile/components/Modal.dart';
 
 class StartingScreen extends StatefulWidget {
-  const StartingScreen({super.key, required this.players});
+  const StartingScreen({super.key, required this.players, required this.starts,});
 
   final List<String> players;
-
+  final bool starts;
   @override
   State<StartingScreen> createState() => _StartingScreenState();
 }
@@ -46,14 +47,18 @@ class _StartingScreenState extends State<StartingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                Container(
-                  width: 120,
-                  child: Center(
-                    child: Label(
-                      widget.players[0],
-                      fontSize: 120 ~/ widget.players[0].length,
+                Column(
+                  children: [SizedBox(
+                    width: 120,
+                    child: Center(
+                      child: Label(
+                        widget.players[0],
+                        fontSize: widget.players[1].length<5?40:120 ~/ widget.players[0].length,
+                      ),
                     ),
                   ),
+                  widget.starts?Container(height:30,child: Label("starts", fontSize: 20,color: Color.fromRGBO(143, 255, 0, 0.5),)):SizedBox(height: 30,)
+                  ],
                 ),
                 Container(
                   child: Label(
@@ -61,15 +66,19 @@ class _StartingScreenState extends State<StartingScreen> {
                     fontSize: 20,
                   ),
                 ),
-                Container(
-                  width: 120,
-                  child: Center(
-                    child: Label(
-                      widget.players[1],
-                      fontSize: 120 ~/ widget.players[1].length,
+                Column(
+                  children: [SizedBox(
+                    width: 120,
+                    child: Center(
+                      child: Label(
+                        widget.players[1],
+                        fontSize: widget.players[1].length<5?40:120 ~/ widget.players[1].length,
+
+                      ),
                     ),
                   ),
-                ),
+                    !widget.starts?Container(height:30,child: Label("starts", fontSize: 20,color: Color.fromRGBO(143, 255, 0, 0.5),)):SizedBox(height: 30,)
+                ]),
               ]),
               SizedBox(
                 height: 50,

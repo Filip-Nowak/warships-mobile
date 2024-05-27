@@ -7,6 +7,7 @@ import 'package:warships_mobile/components/Label.dart';
 import 'package:warships_mobile/components/Modal.dart';
 import 'package:warships_mobile/components/TextInputField.dart';
 import 'package:warships_mobile/models/Room.dart';
+import 'package:warships_mobile/utils/Multiplier.dart';
 import 'package:warships_mobile/utils/Online.dart';
 
 import '../utils/UserDetails.dart';
@@ -73,6 +74,7 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
   bool _isLoading=false;
   @override
   Widget build(BuildContext context) {
+    double multiplier =Multiplier.getMultiplier(context);
     return PopScope(
       canPop: false,
       onPopInvoked: (xd){
@@ -99,7 +101,7 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 75,
+                    height: 20,
                   ),
                   Row(
                     children: [
@@ -116,11 +118,11 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
                     ],
                   ),
                   SizedBox(
-                    height: 75,
+                    height: 75*multiplier,
                   ),
                   Container(
-                    height: 250,
-                    width: 400,
+                    height: 250*multiplier,
+                    width: MediaQuery.of(context).size.width*0.9,
                     decoration: BoxDecoration(
                         color: Color.fromRGBO(15, 39, 3, 1),
                         borderRadius: BorderRadius.all(Radius.circular(30))),
@@ -129,7 +131,7 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
                         SizedBox(
                           height: 20,
                         ),
-                        Label("enter code", fontSize: 50),
+                        Label("enter code", fontSize:( 50*multiplier).toInt()),
                         SizedBox(height: 40),
                         TextInputField(
                           onClick: joinRoom,
@@ -139,16 +141,16 @@ class _JoinRoomLayoutState extends State<JoinRoomLayout> {
                     ),
                   ),
                   SizedBox(
-                    height: 40,
+                    height: 40*multiplier,
                   ),
-                  Label("or", fontSize: 80),
+                  Label("or", fontSize: (80*multiplier).toInt()),
                   SizedBox(
-                    height: 40,
+                    height: 40*multiplier,
                   ),
                   Button(
                     onPressed: createRoom,
                     message: "create room",
-                    fontSize: 50,
+                    fontSize: (50*multiplier).toInt(),
                   )
                 ],
               ),

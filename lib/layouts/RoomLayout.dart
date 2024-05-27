@@ -11,6 +11,7 @@ import 'package:warships_mobile/newBoards/Board.dart';
 import 'package:warships_mobile/utils/ArePlayersReady.dart';
 import 'package:warships_mobile/utils/Handler.dart';
 import 'package:warships_mobile/utils/IsFull.dart';
+import 'package:warships_mobile/utils/Multiplier.dart';
 import 'package:warships_mobile/utils/UserDetails.dart';
 import 'package:warships_mobile/utils/isOwner.dart';
 
@@ -139,6 +140,7 @@ class _RoomLayoutState extends State<RoomLayout> {
 
   @override
   Widget build(BuildContext context) {
+    double multiplier=Multiplier.getMultiplier(context);
     Handler handler = IsFull(ArePlayersReady(IsOwner(null)));
     Widget? result = handler.handle();
     result ??= Container(
@@ -162,11 +164,17 @@ class _RoomLayoutState extends State<RoomLayout> {
                 height: 20,
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(onPressed: leaveRoom, icon: Icon(Icons.arrow_back,size: 50,color: Color.fromRGBO(143, 255, 0,0.5),))
+                  IconButton(onPressed: leaveRoom, icon: Icon(Icons.arrow_back,size: 50,color: Color.fromRGBO(143, 255, 0,0.5),)),
+                  multiplier!=1?
+                  Label("room code", fontSize: 30)
+                      :SizedBox(),
+                  SizedBox(width: 50,)
                 ],
               ),
-              Label("room code", fontSize: 50),
+
+              multiplier==1?Label("room code", fontSize: 50):SizedBox(),
               SizedBox(
                 height: 20,
               ),
@@ -177,16 +185,16 @@ class _RoomLayoutState extends State<RoomLayout> {
                 // child: Label(Online.instance.getRoom()!.id,fontSize: 80,),
                 child: Label(
                   Online.instance.room.id,
-                  fontSize: 80,
+                  fontSize: (80*multiplier).toInt(),
                 ),
               ),
               SizedBox(
                 height:30,
               ),
-              Label("players", fontSize: 50),
-              SizedBox(
+              Label("players", fontSize: (50 * multiplier).toInt()),
+              multiplier==1?SizedBox(
                 height: 30,
-              ),
+              ):SizedBox(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -202,7 +210,8 @@ class _RoomLayoutState extends State<RoomLayout> {
                       : PlayerInfo(nickname: ""),
                 ],
               ),
-              SizedBox(height: 100),
+              multiplier==1?SizedBox(height: 100):
+              SizedBox(height: 60,),
               Container(
                   width: 400,
                   child: playerReady

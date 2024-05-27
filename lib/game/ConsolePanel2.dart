@@ -9,6 +9,7 @@ import 'package:warships_mobile/newBoards/Board.dart';
 import 'package:warships_mobile/newBoards/ConsoleBoard.dart';
 
 import '../newBoards/BoardWidget.dart';
+import '../utils/Multiplier.dart';
 
 class ConsolePanel2 extends StatefulWidget {
   const ConsolePanel2(
@@ -47,7 +48,7 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
 
   @override
   Widget build(BuildContext context) {
-    print("console render");
+    double multiplier=Multiplier.getMultiplier(context);
     return GestureDetector(
       onVerticalDragDown: (details) {
         distance = 0;
@@ -65,8 +66,8 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
         }
       },
       child: Container(
-        width: 370,
-        height: 600,
+        width: MediaQuery.of(context).size.width*0.95,
+        height: MediaQuery.of(context).size.height*0.7,
         color: Color.fromRGBO(66, 0, 0, 1),
         child: Column(
           children: [
@@ -77,8 +78,9 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
                 width: 200,
                 color: Color.fromRGBO(1, 9, 3, 1),
                 child: TimerWidget(
+                  dangerZone: 4,
                   disabled:!widget.playerTurn,
-                  size: 50,
+                  size: (50*multiplier).toInt(),
                   time: widget.time,
                 )),
             SizedBox(
@@ -93,7 +95,7 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
               height: 20,
             ),
             Container(
-                width: 350,
+                width: MediaQuery.of(context).size.width*0.95*0.9,
                 height: 70,
                 color: Color.fromRGBO(1, 9, 3, 1),
                 child: Row(
@@ -107,7 +109,7 @@ class _ConsolePanel2State extends State<ConsolePanel2> {
                           color: Colors.red,
                         )),
                     Container(
-                        width: 270,
+                        width: 220,
                         child: Button(
                           onPressed: () {
                             print("shoot");

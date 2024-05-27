@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:warships_mobile/utils/Multiplier.dart';
 
 class TextInputField extends StatefulWidget {
   const TextInputField({super.key, required this.onClick, required this.fontSize});
@@ -15,15 +16,16 @@ class _TextInputFieldState extends State<TextInputField> {
 
   @override
   Widget build(BuildContext context) {
+    double multiplier=Multiplier.getMultiplier(context);
     return Container(
-      width: 300,
+      width: 300*multiplier,
       height: 50,
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
                 border: Border.all(width: 5, color: Colors.black)),
-            width: 235,
+            width: 235*multiplier-5,
             child: TextField(
               maxLength: 15,
 

@@ -16,6 +16,7 @@ class BottomPanel extends StatelessWidget {
   final bool removeMode;
   final List<int> shipsLeft;
   final void Function() cancel;
+  final double multiplier;
 
   const BottomPanel(
       {super.key,
@@ -26,7 +27,7 @@ class BottomPanel extends StatelessWidget {
       required this.start,
       required this.shipsLeft,
       required this.removeMode,
-      required this.cancel});
+      required this.cancel, required this.multiplier});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class BottomPanel extends StatelessWidget {
           removeMode
               ? Container(
                   width: 400,
-                  height: 170,
+                  height: 170*multiplier,
                   child: Label(
                     "remove mode enabled",
                     fontSize: 40,
@@ -50,6 +51,7 @@ class BottomPanel extends StatelessWidget {
                   shipsLeft: this.shipsLeft,
                   start: start,
                   deploying: board.deployingShip.isNotEmpty,
+            multiplier:multiplier
                 ),
           board.deployingShip.isNotEmpty
               ? Container(
